@@ -1,12 +1,14 @@
-package com.example;
+package com.skillingpetchance;
 
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
 
-@ConfigGroup("example")
-public interface ExampleConfig extends Config
+@ConfigGroup("Skilling Pet Chance")
+public interface SkillingPetChanceConfig extends Config
 {
+	String CONFIG_GROUP = "skillingpetchance";
+
 	@ConfigItem(
 		keyName = "greeting",
 		name = "Welcome Greeting",
