@@ -4,7 +4,7 @@ import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
 
-@ConfigGroup("Skilling Pet Chance")
+@ConfigGroup("skillingpetchance")
 public interface SkillingPetChanceConfig extends Config
 {
 	String CONFIG_GROUP = "skillingpetchance";

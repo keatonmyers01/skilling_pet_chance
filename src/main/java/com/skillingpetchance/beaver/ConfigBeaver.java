@@ -2,60 +2,66 @@ package com.skillingpetchance.beaver;
 
 import com.skillingpetchance.Action;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-public class ConfigBeaver {
-    private List<Map<String, Action>> actions;
+import static java.util.Map.entry;
 
-    private Map<String, Action> generateInitMap(int level){
-        Map<String, Action> initMap = new HashMap<String, Action>();
-        initMap.put("logs", new Action(level, 317647, "logs")); //
-        if(level < 10) return initMap;
-        initMap.put("oak", new Action(level, 361146, "oak"));//
-        if(level < 25) return initMap;
-        initMap.put("willow", new Action(level, 289286, "willow"));//
-        if(level < 30) return initMap;
-        initMap.put("teak", new Action(level, 264366, "teak")); //
-        if(level < 37) return initMap;
-        initMap.put("juniper", new Action(level, 360000, "juniper"));
-        if(level < 40) return initMap;
-        initMap.put("maple", new Action(level, 221918, "maple"));//
-        initMap.put("bark", new Action(level, 214367, "bark"));//
-        if(level < 45) return initMap;
-        initMap.put("mahogany", new Action(level, 220623, "mahogany"));//
-        if(level < 49) return initMap;
-        initMap.put("artic", new Action(level, 145758, "artic"));
-        if(level < 55) return initMap;
-        initMap.put("yew", new Action(level, 145013, "yew"));//
-        if(level < 57) return initMap;
-        initMap.put("blisterwood", new Action(level, 289286, "blisterwood"));//
-        if(level < 60) return initMap;
-        initMap.put("mushrooms", new Action(level, 343000, "mushrooms"));
-        if(level < 70) return initMap;
-        initMap.put("magic", new Action(level, 72321, "magic"));//
-        if(level < 85) return initMap;
-        initMap.put("redwood", new Action(level, 72321, "redwood"));//
-        return initMap;
-    }
+public class ConfigBeaver {
+    private Map<Integer, Map<String, Action>> actions;
+
+    private transient final Map<String, Integer> baseRates = Map.ofEntries(
+            entry("logs", 317647),
+            entry("oak", 361146),
+            entry("willow", 289286),
+            entry("teak", 264366),
+            entry("juniper", 360000),
+            entry("maple", 221918),
+            entry("bark", 214367),
+            entry("mahogany", 220623),
+            entry("arctic", 145758),
+            entry("yew", 145013),
+            entry("blisterwood", 289286),
+            entry("mushrooms", 343000),
+            entry("magic", 72321),
+            entry("redwood", 72321)
+    );
+
 
     public ConfigBeaver(){
-        actions = new ArrayList<Map<String, Action>>();
-        Map<String, Action> initMap;
-
-        for(int i = 1; i <= 99; i++){
-            initMap = generateInitMap(i);
-            actions.add(initMap);
-        }
+        actions = new HashMap<>();
     }
 
-    public List<Map<String, Action>> getActions() {
+    public Map<Integer, Map<String, Action>> getActions() {
         return actions;
     }
 
-    public void setActions(List<Map<String, Action>> actions) {
+    public void setActions(Map<Integer, Map<String, Action>> actions) {
         this.actions = actions;
+    }
+
+    public Map<String, Integer> getBaseRates() {
+        return baseRates;
+    }
+
+    //rates are transient to make storage take up less space in the config, but I want to have the rate stored with the
+    //entry in the object so it doesn't need to be calculated each time the math is done.
+    public void setRates(){
+        Map<String, Action> actionsAtLevel;
+        for (var level : actions.keySet()) {
+            actionsAtLevel= actions.get(level);
+            for(var entry : actionsAtLevel.keySet()){
+                actionsAtLevel.get(entry).calculateRate(
+                        baseRates.get(entry)
+                );
+            }
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "ConfigBeaver{" +
+                "actions=" + actions +
+                '}';
     }
 }

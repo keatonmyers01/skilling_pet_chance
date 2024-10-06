@@ -4,21 +4,17 @@ import com.google.inject.Provides;
 import javax.inject.Inject;
 
 import com.skillingpetchance.beaver.BeaverTracker;
-import com.skillingpetchance.beaver.ConfigBeaver;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
-import net.runelite.api.events.GameStateChanged;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
+import net.runelite.client.events.RuneScapeProfileChanged;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.api.events.ChatMessage;
 import net.runelite.api.Skill;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import java.util.regex.Pattern;
 
 @Slf4j
@@ -56,9 +52,6 @@ public class SkillingPetChancePlugin extends Plugin
 	@Inject
 	private BeaverTracker beaverTracker;
 
-	private ConfigBeaver configBeaver;
-
-
 	@Inject
 	private Client client;
 
@@ -71,7 +64,6 @@ public class SkillingPetChancePlugin extends Plugin
 	@Override
 	protected void startUp() throws Exception
 	{
-		configBeaver = beaverTracker.loadFromConfig();
 	}
 
 	@Override
@@ -111,35 +103,23 @@ public class SkillingPetChancePlugin extends Plugin
 			splitStr = msg.split("\\s+");
 			previousCut = splitStr[3].replaceAll("\\.", "");
 
-			List<Map<String, Action>> actions = configBeaver.getActions();
-			Action action = actions.get(woodcuttingLevel - 1).get(previousCut);
-			action.incrementQuantity(1 + unknownCut);
-			unknownCut = 0;
-			client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", action.toString(), null);
-			beaverTracker.saveToConfig(configBeaver);
-			System.out.println(configManager.getRSProfileConfiguration(SkillingPetChanceConfig.CONFIG_GROUP, "beaver"));
+			beaverTracker.addEntry(woodcuttingLevel, previousCut);
 		}
 
 		if (CLEAN_CUT_PATTERN.matcher(msg).matches())
 		{
 			if(previousCut == null || previousCut.isEmpty()){
-				unknownCut++;
-				client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "++ing unknown cut", null);
+				beaverTracker.incrementUnknownCut();
 			}
 			else{
-				List<Map<String, Action>> actions = configBeaver.getActions();
-				Action action = actions.get(woodcuttingLevel - 1).get(previousCut);
-				action.incrementQuantity(1);
-				client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", action.toString(), null);
-				beaverTracker.saveToConfig(configBeaver);
+				beaverTracker.addEntry(woodcuttingLevel, previousCut);
 			}
 		}
 	}
 
-
 	@Subscribe
-	public void onGameStateChanged(GameStateChanged gameStateChanged)
-	{
+	public void onRuneScapeProfileChanged(RuneScapeProfileChanged e){
+		beaverTracker.loadFromConfig();
 	}
 
 	@Provides
