@@ -1,5 +1,7 @@
-package com.skillingpetchance.beaver;
+package com.skillingpetchance.rockgolem;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.skillingpetchance.Action;
@@ -9,46 +11,37 @@ import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
 import net.runelite.client.config.ConfigManager;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
-
 import java.util.HashMap;
 import java.util.Map;
 
 @Singleton
-public class BeaverTracker {
-    private final String KEY = "beaver";
+public class RockGolemTracker {
+    private final String KEY = "rockGolem";
 
     private final ConfigManager configManager;
     private final Client client;
 
-    private ConfigBeaver configBeaver;
+    private ConfigRockGolem configRockGolem;
 
     PoissonCalculator poissonCalculator = new PoissonCalculator();
-
-    int unknownCut;
 
     @Inject
     private Gson gson;
 
     @Inject
-    private BeaverTracker(ConfigManager configManager, Client client) {
+    private RockGolemTracker(ConfigManager configManager, Client client) {
         this.configManager = configManager;
         this.client = client;
     }
 
-    public void incrementUnknownCut(){
-        unknownCut++;
-    }
-
     private Action getAction(int skillLevel, String actionPerformed) {
-        Map<Integer, Map<String, Action>> actions = configBeaver.getActions();
+        Map<Integer, Map<String, Action>> actions = configRockGolem.getActions();
         Map<String, Action> level = actions.computeIfAbsent(skillLevel, k -> new HashMap<String, Action>());
 
         Action action = level.get(actionPerformed);
 
         if(action == null){
-            Map<String, Integer> baseRates = configBeaver.getBaseRates();
+            Map<String, Integer> baseRates = configRockGolem.getBaseRates();
             if (baseRates.get(actionPerformed) == null){
                 return null;
             }
@@ -64,11 +57,10 @@ public class BeaverTracker {
             return;
         }
 
-        action.incrementQuantity(1 + unknownCut);
-        unknownCut = 0;
-        saveToConfig(configBeaver);
+        action.incrementQuantity(1);
+        saveToConfig(configRockGolem);
         client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", action.toString(), null);
-        double rate = poissonCalculator.calculateSuccess(configBeaver.getActions());
+        double rate = poissonCalculator.calculateSuccess(configRockGolem.getActions());
         client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "total rate: " + rate, null);
 
     }
@@ -77,20 +69,20 @@ public class BeaverTracker {
         String storedValue = configManager.getRSProfileConfiguration(SkillingPetChanceConfig.CONFIG_GROUP, KEY);
 
         if(storedValue == null || storedValue.isEmpty()){
-            configBeaver = new ConfigBeaver();
+            configRockGolem = new ConfigRockGolem();
         }else{
             try{
-                configBeaver = gson.fromJson(storedValue, ConfigBeaver.class);
-                configBeaver.setRates();
+                configRockGolem = gson.fromJson(storedValue, ConfigRockGolem.class);
+                configRockGolem.setRates();
             } catch (JsonSyntaxException ex){
-                configBeaver = null;
+                configRockGolem = null;
             }
         }
     }
 
-    public void saveToConfig(ConfigBeaver configBeaver)
+    public void saveToConfig(ConfigRockGolem configRockGolem)
     {
-        String json = gson.toJson(configBeaver);
+        String json = gson.toJson(configRockGolem);
         {
             configManager.setRSProfileConfiguration(SkillingPetChanceConfig.CONFIG_GROUP, KEY, json);
         }

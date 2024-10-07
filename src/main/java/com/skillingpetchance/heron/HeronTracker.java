@@ -1,54 +1,48 @@
-package com.skillingpetchance.beaver;
+package com.skillingpetchance.heron;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.skillingpetchance.Action;
 import com.skillingpetchance.PoissonCalculator;
 import com.skillingpetchance.SkillingPetChanceConfig;
+import com.skillingpetchance.StaticAction;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
 import net.runelite.client.config.ConfigManager;
-
-import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @Singleton
-public class BeaverTracker {
-    private final String KEY = "beaver";
+public class HeronTracker {
+    private final String KEY = "heron";
 
     private final ConfigManager configManager;
     private final Client client;
 
-    private ConfigBeaver configBeaver;
+    private ConfigHeron configHeron;
 
     PoissonCalculator poissonCalculator = new PoissonCalculator();
-
-    int unknownCut;
 
     @Inject
     private Gson gson;
 
     @Inject
-    private BeaverTracker(ConfigManager configManager, Client client) {
+    private HeronTracker(ConfigManager configManager, Client client) {
         this.configManager = configManager;
         this.client = client;
     }
 
-    public void incrementUnknownCut(){
-        unknownCut++;
-    }
-
     private Action getAction(int skillLevel, String actionPerformed) {
-        Map<Integer, Map<String, Action>> actions = configBeaver.getActions();
+        Map<Integer, Map<String, Action>> actions = configHeron.getActions();
         Map<String, Action> level = actions.computeIfAbsent(skillLevel, k -> new HashMap<String, Action>());
 
         Action action = level.get(actionPerformed);
 
         if(action == null){
-            Map<String, Integer> baseRates = configBeaver.getBaseRates();
+            Map<String, Integer> baseRates = configHeron.getBaseRates();
             if (baseRates.get(actionPerformed) == null){
                 return null;
             }
@@ -60,37 +54,46 @@ public class BeaverTracker {
 
     public void addEntry(int skillLevel, String actionPerformed){
         Action action = getAction(skillLevel, actionPerformed);
-        if(action == null){
+        if(action == null) {
             return;
         }
 
-        action.incrementQuantity(1 + unknownCut);
-        unknownCut = 0;
-        saveToConfig(configBeaver);
+        action.incrementQuantity(1 );
+        saveToConfig(configHeron);
         client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", action.toString(), null);
-        double rate = poissonCalculator.calculateSuccess(configBeaver.getActions());
+        double rate = poissonCalculator.calculateSuccess(configHeron.getActions());
         client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "total rate: " + rate, null);
+    }
 
+    public void addStaticEntry(String actionPerformed){
+        Map<String, StaticAction> actions = configHeron.getStaticActions();
+
+        StaticAction action = actions.get(actionPerformed);
+        action.incrementQuantity(1 );
+        saveToConfig(configHeron);
+        client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", action.toString(), null);
+        double rate = poissonCalculator.calculateSuccess(configHeron.getActions());
+        client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "total rate: " + rate, null);
     }
 
     public void loadFromConfig(){
         String storedValue = configManager.getRSProfileConfiguration(SkillingPetChanceConfig.CONFIG_GROUP, KEY);
 
         if(storedValue == null || storedValue.isEmpty()){
-            configBeaver = new ConfigBeaver();
+            configHeron = new ConfigHeron();
         }else{
             try{
-                configBeaver = gson.fromJson(storedValue, ConfigBeaver.class);
-                configBeaver.setRates();
+                configHeron = gson.fromJson(storedValue, ConfigHeron.class);
+                configHeron.setRates();
             } catch (JsonSyntaxException ex){
-                configBeaver = null;
+                configHeron = null;
             }
         }
     }
 
-    public void saveToConfig(ConfigBeaver configBeaver)
+    public void saveToConfig(ConfigHeron configHeron)
     {
-        String json = gson.toJson(configBeaver);
+        String json = gson.toJson(configHeron);
         {
             configManager.setRSProfileConfiguration(SkillingPetChanceConfig.CONFIG_GROUP, KEY, json);
         }

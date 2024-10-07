@@ -3,6 +3,8 @@ package com.skillingpetchance;
 import java.util.Map;
 
 public class PoissonCalculator {
+
+    //Actually the best I can probably do as getting the proper number would be absurd on compute
     public double calculateSuccess(Map<Integer, Map<String, Action>> actions){
         double totalLambda = 0.0;
         Map<String, Action> actionsAtLevel;
