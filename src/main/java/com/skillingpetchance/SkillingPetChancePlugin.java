@@ -17,13 +17,18 @@ import net.runelite.api.events.*;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.RuneScapeProfileChanged;
+import net.runelite.client.game.WorldService;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
+import net.runelite.http.api.worlds.WorldResult;
+import net.runelite.http.api.worlds.WorldType;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.Iterator;
+
 
 @Slf4j
 @PluginDescriptor(
@@ -78,6 +83,9 @@ public class SkillingPetChancePlugin extends Plugin
 	private boolean pyramidLock = false;
 
 	@Inject
+	private WorldService worldService;
+
+	@Inject
 	private BeaverTracker beaverTracker;
 
 	@Inject
@@ -110,9 +118,14 @@ public class SkillingPetChancePlugin extends Plugin
 	@Inject
 	private SkillingPetChanceConfig config;
 
+	WorldResult worldResult;
+
+	private final List<Integer> disallowedRegions = Arrays.asList(54273, 33546, 46608, 10044, 10300, 12080, 12336, 12592, 12079, 12335);
+
 	@Override
 	protected void startUp() throws Exception
 	{
+		worldResult = worldService.getWorlds();
 	}
 
 	@Override
@@ -150,13 +163,16 @@ public class SkillingPetChancePlugin extends Plugin
 			return;
 		}
 
+		if(petNotObtainableHere()) {
+			return;
+		}
+
 		updateLevels();
 		checkMaxXp();
 		String[] splitStr = null;
 		final var msg = event.getMessage();
 
 		//Woodcutting
-		//TODO DISABLE on miscellania, ecetera, tutorial island, and pest control
 		//accuracy could be improved if I can figure out detecting numilite/fossils at fossil island.
 		if(WOOD_CUT_PATTERN.matcher(msg).matches())
 		{
@@ -330,6 +346,15 @@ public class SkillingPetChancePlugin extends Plugin
 		return client.getLocalPlayer() != null
 				&& PYRAMID_PLUNDER_REGION == client.getLocalPlayer().getWorldLocation().getRegionID()
 				&& client.getVarbitValue(Varbits.PYRAMID_PLUNDER_TIMER) > 0;
+	}
+
+	public boolean petNotObtainableHere(){
+		for (WorldType type : worldResult.findWorld(client.getWorld()).getTypes()){
+			if(type.equals(WorldType.MEMBERS)){
+				return disallowedRegions.contains(client.getLocalPlayer().getWorldLocation().getRegionID());
+			}
+		}
+		return true;
 	}
 
     @Subscribe
