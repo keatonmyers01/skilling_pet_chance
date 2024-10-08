@@ -88,6 +88,8 @@ public class SkillingPetChancePlugin extends Plugin
 	static final int GRAND_GOLD_CHEST_CLOSED_ID = ObjectID.GRAND_GOLD_CHEST;
 	private List<GameObject> grandChests = new ArrayList<>();
 	private boolean pyramidLock = false;
+	private Item[] InventoryBefore;
+	private final int RC_ANIM = 791;
 
 	private boolean blastMineLock = false;
 
@@ -380,7 +382,29 @@ public class SkillingPetChancePlugin extends Plugin
 					}
 				}
 			}
+		} else if (RC_ANIM == client.getLocalPlayer().getAnimation()) {
+			if(client.getLocalPlayer().getWorldLocation().getX() > 3055 && client.getLocalPlayer().getLocalLocation().getX() < 3067 &&client.getLocalPlayer().getLocalLocation().getY() > 5574 &&client.getLocalPlayer().getLocalLocation().getY() < 5584) {
+				riftGuardianTracker.addEntry(runecraftingLevel, "OURANIA", riftGuardianTracker.getDaeyalt()+riftGuardianTracker.getRegular());
+				riftGuardianTracker.setDaeyalt(0);
+				riftGuardianTracker.setRegular(0);
+			} else {
+				riftGuardianTracker.addEntry(runecraftingLevel, "OTHER", riftGuardianTracker.getDaeyalt()+riftGuardianTracker.getRegular());
+				riftGuardianTracker.setDaeyalt(0);
+				riftGuardianTracker.setRegular(0);
+			}
 		}
+		else if (event.getItemContainer() == client.getItemContainer(InventoryID.INVENTORY)) {
+				Item[] items = event.getItemContainer().getItems();
+				for (Item i : items) {
+					if (i.getId() == ItemID.DAEYALT_ESSENCE) {
+						riftGuardianTracker.setDaeyalt(riftGuardianTracker.getDaeyalt() + 1);
+					}
+					if (i.getId() == ItemID.RUNE_ESSENCE || i.getId() == ItemID.PURE_ESSENCE) {
+						riftGuardianTracker.setRegular(riftGuardianTracker.getRegular() + 1);
+					}
+				}
+		}
+
 	}
 
 
