@@ -35,6 +35,7 @@ public class TanglerootTracker {
     }
 
     private Action getAction(int skillLevel, String actionPerformed) {
+        actionPerformed =actionPerformed.toUpperCase();
         Map<Integer, Map<String, Action>> actions = configTangleroot.getActions();
         Map<String, Action> level = actions.computeIfAbsent(skillLevel, k -> new HashMap<String, Action>());
 

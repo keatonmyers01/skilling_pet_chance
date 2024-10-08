@@ -59,6 +59,8 @@ public class BeaverTracker {
     }
 
     public void addEntry(int skillLevel, String actionPerformed){
+        actionPerformed =actionPerformed.toUpperCase();
+
         Action action = getAction(skillLevel, actionPerformed);
         if(action == null){
             return;

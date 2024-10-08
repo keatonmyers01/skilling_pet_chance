@@ -9,10 +9,10 @@ public class ConfigRiftGuardian extends AbstractConfig {
     @Override
     protected Map<String, Integer> initializeBaseRates() {
         return Map.<String, Integer>ofEntries(
-                Map.entry("arceuus blood", 804984),
-                Map.entry("arceuus soul", 782999),
-                Map.entry("ourania", 1487213),
-                Map.entry("other", 1795758)
+            Map.entry("ARCEUUS BLOOD", 804984),
+            Map.entry("ARCEUUS SOUL", 782999),
+            Map.entry("OURANIA", 1487213),
+            Map.entry("OTHER", 1795758)
         );
     }
 }

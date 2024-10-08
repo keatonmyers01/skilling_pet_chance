@@ -11,7 +11,12 @@ public class Action {
     public Action(int level, int baseRate, String name) {
         this.quantity = 0;
         this.level = level;
-        this.rate = 1 / ((double)baseRate - ((double)level * 25));
+        if(level == 200){
+            this.rate = (1 / ((double) baseRate - ((double) 99 * 25))) * 15;
+        }
+        else {
+            this.rate = 1 / ((double) baseRate - ((double) level * 25));
+        }
         this.name = name;
     }
 

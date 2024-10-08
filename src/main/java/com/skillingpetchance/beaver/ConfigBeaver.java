@@ -10,21 +10,21 @@ public class ConfigBeaver extends AbstractConfig{
     @Override
     protected Map<String, Integer> initializeBaseRates() {
         return Map.<String, Integer>ofEntries(
-                entry("logs", 317647),
-                entry("oak", 361146),
-                entry("willow", 289286),
-                entry("teak", 264366),
-                entry("juniper", 360000),
-                entry("maple", 221918),
-                entry("bark", 214367),
-                entry("mahogany", 220623),
-                entry("arctic", 145758),
-                entry("yew", 145013),
-                entry("blisterwood", 289286),
-                //do the numilite/fossils count for pet rate if so not tracking it rn.
-                entry("mushrooms", 343000),
-                entry("magic", 72321),
-                entry("redwood", 72321)
+            entry("LOGS", 317647),
+            entry("OAK", 361146),
+            entry("WILLOW", 289286),
+            entry("TEAK", 264366),
+            entry("JUNIPER", 360000),
+            entry("MAPLE", 221918),
+            entry("BARK", 214367),
+            entry("MAHOGANY", 220623),
+            entry("ARCTIC", 145758),
+            entry("YEW", 145013),
+            entry("BLISTERWOOD", 289286),
+            //do the numilite/fossils count for pet rate if so not tracking it rn.
+            entry("MUSHROOMS", 343000),
+            entry("MAGIC", 72321),
+            entry("REDWOOD", 72321)
         );
     }
 }

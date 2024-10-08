@@ -52,6 +52,7 @@ public class RockyTracker {
     }
 
     public void addEntry(int skillLevel, String actionPerformed){
+        actionPerformed =actionPerformed.toUpperCase();
         Action action = getAction(skillLevel, actionPerformed);
         if(action == null){
             System.out.println("action = null");

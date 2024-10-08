@@ -53,6 +53,7 @@ public class HeronTracker {
     }
 
     public void addEntry(int skillLevel, String actionPerformed){
+        actionPerformed =actionPerformed.toUpperCase();
         Action action = getAction(skillLevel, actionPerformed);
         if(action == null) {
             return;
@@ -66,6 +67,7 @@ public class HeronTracker {
     }
 
     public void addStaticEntry(String actionPerformed){
+        actionPerformed =actionPerformed.toUpperCase();
         Map<String, StaticAction> actions = configHeron.getStaticActions();
 
         StaticAction action = actions.get(actionPerformed);

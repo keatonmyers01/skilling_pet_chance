@@ -125,6 +125,16 @@ public class SkillingPetChancePlugin extends Plugin
 		runecraftingLevel = client.getRealSkillLevel(RUNECRAFT);
 		thievingLevel = client.getRealSkillLevel(THIEVING);
 	}
+	private void checkMaxXp(){
+		if(client.getSkillExperience(WOODCUTTING) == 200000000) woodcuttingLevel = 200;
+		if(client.getSkillExperience(FARMING) == 200000000) farmingLevel = 200;
+		if(client.getSkillExperience(AGILITY) == 200000000) agilityLevel = 200;
+		if(client.getSkillExperience(HUNTER) == 200000000) hunterLevel = 200;
+		if(client.getSkillExperience(FISHING) == 200000000) fishingLevel = 200;
+		if(client.getSkillExperience(MINING) == 200000000) miningLevel = 200;
+		if(client.getSkillExperience(RUNECRAFT) == 200000000) runecraftingLevel = 200;
+		if(client.getSkillExperience(THIEVING) == 200000000) thievingLevel = 200;
+	}
 
 	@Subscribe
 	public void onChatMessage(ChatMessage event) {
@@ -136,6 +146,7 @@ public class SkillingPetChancePlugin extends Plugin
 		}
 
 		updateLevels();
+		checkMaxXp();
 		String[] splitStr = null;
 		final var msg = event.getMessage();
 
@@ -179,7 +190,6 @@ public class SkillingPetChancePlugin extends Plugin
 			if(action.equals("volcanic")){
 				action = "volcanic sulphur";
 			}
-
 			rockGolemTracker.addEntry(miningLevel , action);
 		}
 
@@ -238,12 +248,12 @@ public class SkillingPetChancePlugin extends Plugin
 		//AGILITY
 		if(AGILITY_PATTERN.matcher(msg).matches()){
 			String course = msg.split("Your ")[1].split(" lap")[0];
-			rockyTracker.addEntry(agilityLevel, course);
+			giantSquirrelTracker.addEntry(agilityLevel, course);
 		}
 
 		if(SEPULCHRE_PATTERN.matcher(msg).matches()){
-			String floor = msg.split("\\s+")[0];
-			rockyTracker.addEntry(agilityLevel, floor);
+			String floor = msg.split("\\s+")[1];
+			giantSquirrelTracker.addStaticEntry("FLOOR " + floor);
 		}
 
 		//FISHING
@@ -253,16 +263,13 @@ public class SkillingPetChancePlugin extends Plugin
 
 		if(FISHING_PATTERN.matcher(msg).matches()){
 			splitStr = msg.split("\\s+");
-			String action = splitStr[3].replaceAll("\\.", "").replace("shrimp", "shrimps");
+			String action = splitStr[3].replaceAll("\\.", "").replaceAll("!", "").replace("shrimp", "shrimps");
 			heronTracker.addEntry(fishingLevel, action);
 		}
 
 		if(AERIAL_PATTERN.matcher(msg).matches()){
 			heronTracker.addEntry(fishingLevel, "aerial");
 		}
-
-
-
 	}
 
     @Subscribe

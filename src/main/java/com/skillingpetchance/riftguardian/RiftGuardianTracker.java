@@ -51,13 +51,14 @@ public class RiftGuardianTracker {
         return action;
     }
 
-    public void addEntry(int skillLevel, String actionPerformed){
+    public void addEntry(int skillLevel, String actionPerformed, int quantity){
+        actionPerformed =actionPerformed.toUpperCase();
         Action action = getAction(skillLevel, actionPerformed);
         if(action == null) {
             return;
         }
 
-        action.incrementQuantity(1 );
+        action.incrementQuantity(quantity);
         saveToConfig(configRiftGuardian);
         client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", action.toString(), null);
         double rate = poissonCalculator.calculateSuccess(configRiftGuardian.getActions());

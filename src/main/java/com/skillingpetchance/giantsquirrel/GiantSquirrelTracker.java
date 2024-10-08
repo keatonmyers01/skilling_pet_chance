@@ -7,6 +7,7 @@ import com.google.inject.Singleton;
 import com.skillingpetchance.Action;
 import com.skillingpetchance.PoissonCalculator;
 import com.skillingpetchance.SkillingPetChanceConfig;
+import com.skillingpetchance.StaticAction;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
 import net.runelite.client.config.ConfigManager;
@@ -52,11 +53,24 @@ public class GiantSquirrelTracker {
     }
 
     public void addEntry(int skillLevel, String actionPerformed){
+        actionPerformed =actionPerformed.toUpperCase();
         Action action = getAction(skillLevel, actionPerformed);
         if(action == null) {
             return;
         }
 
+        action.incrementQuantity(1 );
+        saveToConfig(configGiantSquirrel);
+        client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", action.toString(), null);
+        double rate = poissonCalculator.calculateSuccess(configGiantSquirrel.getActions());
+        client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "total rate: " + rate, null);
+    }
+
+    public void addStaticEntry(String actionPerformed){
+        actionPerformed =actionPerformed.toUpperCase();
+        Map<String, StaticAction> actions = configGiantSquirrel.getStaticActions();
+
+        StaticAction action = actions.get(actionPerformed);
         action.incrementQuantity(1 );
         saveToConfig(configGiantSquirrel);
         client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", action.toString(), null);
