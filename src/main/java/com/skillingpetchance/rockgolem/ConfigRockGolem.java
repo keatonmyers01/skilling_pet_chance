@@ -18,7 +18,7 @@ public class ConfigRockGolem extends AbstractConfig {
             Map.entry("LOVAKITE", 245526),
             Map.entry("GEM", 211886),
             Map.entry("MITHRIL", 148320),
-            Map.entry("BLAST MINE ", 123600),
+            Map.entry("BLAST MINE", 123600),
             //on fragment mined not minigame completion
             Map.entry("VOLCANIC MINE", 60000),
             Map.entry("ADAMANTITE", 59328),

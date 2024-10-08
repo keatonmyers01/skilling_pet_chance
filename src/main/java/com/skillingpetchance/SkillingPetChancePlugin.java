@@ -89,6 +89,8 @@ public class SkillingPetChancePlugin extends Plugin
 	private List<GameObject> grandChests = new ArrayList<>();
 	private boolean pyramidLock = false;
 
+	private boolean blastMineLock = false;
+
 	@Inject
 	private WorldService worldService;
 
@@ -319,20 +321,38 @@ public class SkillingPetChancePlugin extends Plugin
 	public void onGameTick(GameTick tick)
 	{
 		if(isInPyramidPlunder()){
-			Iterator<GameObject> iterator = grandChests.iterator();
-			while(iterator.hasNext()){
-				GameObject chest = iterator.next();
-				ObjectComposition imposter = client.getObjectDefinition(chest.getId()).getImpostor();
-				if(GRAND_GOLD_CHEST_CLOSED_ID != imposter.getId()){
-					if(!pyramidLock) {
-						rockyTracker.addEntry(thievingLevel, "CHEST ROOM " + client.getVarbitValue(Varbits.PYRAMID_PLUNDER_ROOM));
-						pyramidLock = true;
-					}
-				}else if(GRAND_GOLD_CHEST_CLOSED_ID == imposter.getId() && pyramidLock){
-					pyramidLock = false;
+            for (GameObject chest : grandChests) {
+                ObjectComposition imposter = client.getObjectDefinition(chest.getId()).getImpostor();
+                if (GRAND_GOLD_CHEST_CLOSED_ID != imposter.getId()) {
+                    if (!pyramidLock) {
+                        updateLevels();
+                        checkMaxXp();
+                        rockyTracker.addEntry(thievingLevel, "CHEST ROOM " + client.getVarbitValue(Varbits.PYRAMID_PLUNDER_ROOM));
+                        pyramidLock = true;
+                    }
+                } else if (GRAND_GOLD_CHEST_CLOSED_ID == imposter.getId() && pyramidLock) {
+                    pyramidLock = false;
+                }
+            }
+		}
+		if(isInBlastMine()){
+			if(client.getLocalPlayer().getAnimation() == 3687){
+				if(blastMineLock){
+					blastMineLock = false;
+				} else{
+					updateLevels();
+					checkMaxXp();
+					rockGolemTracker.addEntry(miningLevel, "BLAST MINE");
+					blastMineLock=true;
 				}
+
 			}
 		}
+		/*
+		if(client.getLocalPlayer().getAnimation() != -1){
+			System.out.println(client.getLocalPlayer().getAnimation());
+		}
+		*/
 	}
 
 	@Subscribe
@@ -354,6 +374,8 @@ public class SkillingPetChancePlugin extends Plugin
 				Item[] items = event.getItemContainer().getItems();
 				for (Item i : items) {
 					if (i.getId() == ItemID.STARDUST) {
+						updateLevels();
+						checkMaxXp();
 						rockGolemTracker.addEntry(miningLevel, "STARDUST");
 					}
 				}
@@ -378,6 +400,11 @@ public class SkillingPetChancePlugin extends Plugin
 		return true;
 	}
 
+	public boolean isInBlastMine(){
+		return client.getLocalPlayer() != null && 5948 == client.getLocalPlayer().getWorldLocation().getRegionID();
+	}
+
+
     @Subscribe
 	public void onRuneScapeProfileChanged(RuneScapeProfileChanged e){
 		beaverTracker.loadFromConfig();
@@ -388,6 +415,8 @@ public class SkillingPetChancePlugin extends Plugin
 		tanglerootTracker.loadFromConfig();
 		giantSquirrelTracker.loadFromConfig();
 		riftGuardianTracker.loadFromConfig();
+		updateLevels();
+		checkMaxXp();
 	}
 
 	@Provides
