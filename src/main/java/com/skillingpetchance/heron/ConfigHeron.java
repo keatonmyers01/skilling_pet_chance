@@ -14,7 +14,7 @@ public class ConfigHeron extends AbstractConfig {
         super();
         staticActions = Map.<String, StaticAction>ofEntries(
                 //technically scales to contribution between 5000-2500 but going with the min contribution for now
-                Map.entry("trawler", new StaticAction(5000, "fishing trawler"))
+                Map.entry("TRAWLER", new StaticAction(5000, "fishing trawler"))
         );
     }
     @Override
@@ -40,7 +40,6 @@ public class ConfigHeron extends AbstractConfig {
             Map.entry("SHARK", 82243),
             Map.entry("INFERNAL", 160000),
             Map.entry("ANGLERFISH", 82758),
-            //may or may not be static, there are conflicting sources pointed to on the wiki, most recent (from mod ash) is not static. Treating as if not static
             Map.entry("MINNOWS", 131395),
             Map.entry("DARK", 149434),
             Map.entry("SACRED", 99000),
@@ -48,7 +47,6 @@ public class ConfigHeron extends AbstractConfig {
             Map.entry("COD", 382609),
             Map.entry("BASS", 382609),
             Map.entry("AERIAL", 636833),
-            //camdozaal
             Map.entry("RAW", 257770)
         );
     }

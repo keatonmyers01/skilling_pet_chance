@@ -12,18 +12,18 @@ import com.skillingpetchance.rockgolem.RockGolemTracker;
 import com.skillingpetchance.rocky.RockyTracker;
 import com.skillingpetchance.tangleroot.TanglerootTracker;
 import lombok.extern.slf4j.Slf4j;
-import net.runelite.api.ChatMessageType;
-import net.runelite.api.Client;
-import net.runelite.api.events.WidgetLoaded;
+import net.runelite.api.*;
+import net.runelite.api.events.*;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.RuneScapeProfileChanged;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
-import net.runelite.api.events.ChatMessage;
-import net.runelite.api.Skill;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
+import java.util.Iterator;
 
 @Slf4j
 @PluginDescriptor(
@@ -52,6 +52,8 @@ public class SkillingPetChancePlugin extends Plugin
 	private String previousCut;
 	private boolean ignore = false;
 
+	private static final int PYRAMID_PLUNDER_REGION = 7749;
+
 	//patterns
 	private static final Pattern WOOD_CUT_PATTERN = Pattern.compile("You get (?:some|an)[\\w ]+(?:logs?|mushrooms)\\.");
 	private static final Pattern CLEAN_CUT_PATTERN = Pattern.compile("You strike a clean cut without gathering any material\\.");
@@ -70,7 +72,10 @@ public class SkillingPetChancePlugin extends Plugin
 	private static final Pattern AERIAL_PATTERN = Pattern.compile("You send your cormorant to try to catch a fish from out at sea\\.");
 	private static final Pattern VALUABLES_PATTERN = Pattern.compile("You (find some valuable items\\.|grab a bunch of valuables!)");
 
-
+	static final int GRAND_GOLD_CHEST_ID = NullObjectID.NULL_26616;
+	static final int GRAND_GOLD_CHEST_CLOSED_ID = ObjectID.GRAND_GOLD_CHEST;
+	private List<GameObject> grandChests = new ArrayList<>();
+	private boolean pyramidLock = false;
 
 	@Inject
 	private BeaverTracker beaverTracker;
@@ -235,8 +240,10 @@ public class SkillingPetChancePlugin extends Plugin
 				rockyTracker.addEntry(thievingLevel, "Fruit Stall");
 			}else if(item.equals("silk") || item.equals("tea")){
 				rockyTracker.addEntry(thievingLevel, item + " Stall");
+			}else if(item.matches("empty|hammer|tinderbox|banana|ring|necklace|bracelet|amulet|chisel|gold")){
+				rockyTracker.addEntry(thievingLevel, "monkey Stall");
 			}else{
-				rockyTracker.addEntry(thievingLevel,  "Common Stall");
+				rockyTracker.addEntry(thievingLevel, "Common Stall");
 			}
 
 		}
@@ -274,8 +281,56 @@ public class SkillingPetChancePlugin extends Plugin
 
     @Subscribe
     public void onWidgetLoaded(WidgetLoaded event) {
-
     }
+
+	@Subscribe
+	public void onGameStateChanged(GameStateChanged event)
+	{
+		if (event.getGameState() == GameState.LOADING)
+		{
+			grandChests.clear();
+		}
+	}
+
+	@Subscribe
+	public void onGameTick(GameTick tick)
+	{
+		if(isInPyramidPlunder()){
+			Iterator<GameObject> iterator = grandChests.iterator();
+			while(iterator.hasNext()){
+				GameObject chest = iterator.next();
+				ObjectComposition imposter = client.getObjectDefinition(chest.getId()).getImpostor();
+				if(GRAND_GOLD_CHEST_CLOSED_ID != imposter.getId()){
+					if(!pyramidLock) {
+						rockyTracker.addEntry(thievingLevel, "CHEST ROOM " + client.getVarbitValue(Varbits.PYRAMID_PLUNDER_ROOM));
+						pyramidLock = true;
+					}
+				}else if(GRAND_GOLD_CHEST_CLOSED_ID == imposter.getId() && pyramidLock){
+					pyramidLock = false;
+				}
+			}
+		}
+	}
+
+	@Subscribe
+	public void onGameObjectSpawned(GameObjectSpawned event)
+	{
+		GameObject object = event.getGameObject();
+		if(GRAND_GOLD_CHEST_ID == object.getId()){
+			grandChests.add(object);
+		}
+		if(GRAND_GOLD_CHEST_CLOSED_ID == object.getId()) {
+			grandChests.add(object);
+		}
+	}
+
+
+	public boolean isInPyramidPlunder()
+	{
+		return client.getLocalPlayer() != null
+				&& PYRAMID_PLUNDER_REGION == client.getLocalPlayer().getWorldLocation().getRegionID()
+				&& client.getVarbitValue(Varbits.PYRAMID_PLUNDER_TIMER) > 0;
+	}
 
     @Subscribe
 	public void onRuneScapeProfileChanged(RuneScapeProfileChanged e){
