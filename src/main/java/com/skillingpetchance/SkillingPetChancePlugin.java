@@ -1,5 +1,6 @@
 package com.skillingpetchance;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.Provides;
 import javax.inject.Inject;
 
@@ -22,12 +23,10 @@ import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.http.api.worlds.WorldResult;
 import net.runelite.http.api.worlds.WorldType;
+import net.runelite.api.AnimationID.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Pattern;
-import java.util.Iterator;
 
 
 @Slf4j
@@ -58,6 +57,14 @@ public class SkillingPetChancePlugin extends Plugin
 	private boolean ignore = false;
 
 	private static final int PYRAMID_PLUNDER_REGION = 7749;
+
+	static final Set<Integer> STAR_ANIMS= ImmutableSet.of(
+			AnimationID.MINING_CRASHEDSTAR_ADAMANT, AnimationID.MINING_CRASHEDSTAR_BLACK, AnimationID.MINING_CRASHEDSTAR_BRONZE,
+			AnimationID.MINING_CRASHEDSTAR_CRYSTAL, AnimationID.MINING_CRASHEDSTAR_DRAGON, AnimationID.MINING_CRASHEDSTAR_DRAGON_OR,
+			AnimationID.MINING_CRASHEDSTAR_DRAGON_OR_TRAILBLAZER, AnimationID.MINING_CRASHEDSTAR_DRAGON_UPGRADED,
+			AnimationID.MINING_CRASHEDSTAR_GILDED, 	AnimationID.MINING_CRASHEDSTAR_INFERNAL, AnimationID.MINING_CRASHEDSTAR_IRON,
+			AnimationID.MINING_CRASHEDSTAR_MITHRIL, AnimationID.MINING_CRASHEDSTAR_RUNE, 	AnimationID.MINING_CRASHEDSTAR_STEEL
+	);
 
 	//patterns
 	private static final Pattern WOOD_CUT_PATTERN = Pattern.compile("You get (?:some|an)[\\w ]+(?:logs?|mushrooms)\\.");
@@ -337,6 +344,20 @@ public class SkillingPetChancePlugin extends Plugin
 		}
 		if(GRAND_GOLD_CHEST_CLOSED_ID == object.getId()) {
 			grandChests.add(object);
+		}
+	}
+
+	@Subscribe
+	public void onItemContainerChanged(ItemContainerChanged event) {
+		if (STAR_ANIMS.contains(client.getLocalPlayer().getAnimation())){
+			if (event.getItemContainer() == client.getItemContainer(InventoryID.INVENTORY)) {
+				Item[] items = event.getItemContainer().getItems();
+				for (Item i : items) {
+					if (i.getId() == ItemID.STARDUST) {
+						rockGolemTracker.addEntry(miningLevel, "STARDUST");
+					}
+				}
+			}
 		}
 	}
 
