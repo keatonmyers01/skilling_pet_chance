@@ -425,16 +425,25 @@ public class SkillingPetChancePlugin extends Plugin
 
 		int animId = event.getActor().getAnimation();
 		if(animId == 791) {
-			client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Current region ID: " + client.getLocalPlayer().getWorldLocation().getRegionID(), null);
 			if (client.getLocalPlayer().getWorldLocation().getRegionID() == 12119) {
 				riftGuardianTracker.addEntry(runecraftingLevel, "OURANIA", riftGuardianTracker.getDaeyalt() + riftGuardianTracker.getRegular());
 				riftGuardianTracker.setDaeyalt(0);
 				riftGuardianTracker.setRegular(0);
-			} else {
+			} else if(client.getLocalPlayer().getWorldLocation().getRegionID() == 6715) {
+				riftGuardianTracker.addEntry(runecraftingLevel, "ARCEUUS BLOOD", riftGuardianTracker.getDark() + 1);
+				riftGuardianTracker.setDark(0);
+			} else if(client.getLocalPlayer().getWorldLocation().getRegionID() == 7228) {
+				riftGuardianTracker.addEntry(runecraftingLevel, "ARCEUUS SOUL", riftGuardianTracker.getDark() + 1);
+				riftGuardianTracker.setDark(0);
+			}
+			else {
 				riftGuardianTracker.addEntry(runecraftingLevel, "OTHER", riftGuardianTracker.getDaeyalt() + riftGuardianTracker.getRegular());
 				riftGuardianTracker.setDaeyalt(0);
 				riftGuardianTracker.setRegular(0);
 			}
+		}
+		if(animId == 7202) {
+			riftGuardianTracker.setDark(riftGuardianTracker.getDark() + 1);
 		}
 	}
 
