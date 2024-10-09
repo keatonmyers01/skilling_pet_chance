@@ -46,7 +46,7 @@ public class HeronTracker {
             if (baseRates.get(actionPerformed) == null){
                 return null;
             }
-            action = new Action(skillLevel, baseRates.get(actionPerformed), actionPerformed);
+            action = new Action(skillLevel, baseRates.get(actionPerformed));
             level.put(actionPerformed,action);
         }
         return action;

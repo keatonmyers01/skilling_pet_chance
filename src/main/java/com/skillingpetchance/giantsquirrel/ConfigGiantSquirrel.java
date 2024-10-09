@@ -44,8 +44,8 @@ public class ConfigGiantSquirrel extends AbstractConfig {
             Map.entry("AGILITY PYRAMID", 131395),
             Map.entry("SHAYZIEN BASIC AGILITY COURSE", 98373),
             Map.entry("SHAYZIEN ADVANCED AGILITY COURSE", 98373),
-            Map.entry("COLOSSAL WYRM AGILITY COURSE (BASIC)", 0),
-            Map.entry("COLOSSAL WYRM AGILITY COURSE (ADVANCED)", 0),
+            Map.entry("COLOSSAL WYRM AGILITY COURSE (BASIC)", 28503),
+            Map.entry("COLOSSAL WYRM AGILITY COURSE (ADVANCED)", 25406),
             Map.entry("AGILITY ARENA", 98373)
         );
     }

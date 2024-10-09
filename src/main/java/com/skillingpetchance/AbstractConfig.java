@@ -32,9 +32,7 @@ public abstract class AbstractConfig {
         for (var level : actions.keySet()) {
             actionsAtLevel = actions.get(level);
             for (var entry : actionsAtLevel.keySet()) {
-                actionsAtLevel.get(entry).calculateRate(
-                        baseRates.get(entry)
-                );
+                actionsAtLevel.get(entry).calculateRate(baseRates.get(entry), level);
             }
         }
     }
