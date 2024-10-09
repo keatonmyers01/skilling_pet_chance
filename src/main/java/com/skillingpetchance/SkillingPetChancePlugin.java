@@ -23,7 +23,6 @@ import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.http.api.worlds.WorldResult;
 import net.runelite.http.api.worlds.WorldType;
-import net.runelite.api.AnimationID.*;
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -88,8 +87,6 @@ public class SkillingPetChancePlugin extends Plugin
 	static final int GRAND_GOLD_CHEST_CLOSED_ID = ObjectID.GRAND_GOLD_CHEST;
 	private List<GameObject> grandChests = new ArrayList<>();
 	private boolean pyramidLock = false;
-	private Item[] InventoryBefore;
-	private final int RC_ANIM = 791;
 
 	private boolean blastMineLock = false;
 
@@ -350,11 +347,6 @@ public class SkillingPetChancePlugin extends Plugin
 
 			}
 		}
-		/*
-		if(client.getLocalPlayer().getAnimation() != -1){
-			System.out.println(client.getLocalPlayer().getAnimation());
-		}
-		*/
 	}
 
 	@Subscribe
@@ -382,19 +374,11 @@ public class SkillingPetChancePlugin extends Plugin
 					}
 				}
 			}
-		} else if (RC_ANIM == client.getLocalPlayer().getAnimation()) {
-			if(client.getLocalPlayer().getWorldLocation().getX() > 3055 && client.getLocalPlayer().getLocalLocation().getX() < 3067 &&client.getLocalPlayer().getLocalLocation().getY() > 5574 &&client.getLocalPlayer().getLocalLocation().getY() < 5584) {
-				riftGuardianTracker.addEntry(runecraftingLevel, "OURANIA", riftGuardianTracker.getDaeyalt()+riftGuardianTracker.getRegular());
-				riftGuardianTracker.setDaeyalt(0);
-				riftGuardianTracker.setRegular(0);
-			} else {
-				riftGuardianTracker.addEntry(runecraftingLevel, "OTHER", riftGuardianTracker.getDaeyalt()+riftGuardianTracker.getRegular());
-				riftGuardianTracker.setDaeyalt(0);
-				riftGuardianTracker.setRegular(0);
-			}
 		}
 		else if (event.getItemContainer() == client.getItemContainer(InventoryID.INVENTORY)) {
 				Item[] items = event.getItemContainer().getItems();
+				riftGuardianTracker.setDaeyalt(0);
+				riftGuardianTracker.setRegular(0);
 				for (Item i : items) {
 					if (i.getId() == ItemID.DAEYALT_ESSENCE) {
 						riftGuardianTracker.setDaeyalt(riftGuardianTracker.getDaeyalt() + 1);
@@ -428,6 +412,31 @@ public class SkillingPetChancePlugin extends Plugin
 		return client.getLocalPlayer() != null && 5948 == client.getLocalPlayer().getWorldLocation().getRegionID();
 	}
 
+	@Subscribe
+	public void onAnimationChanged(AnimationChanged event) {
+		if (client.getLocalPlayer() == null || client.getLocalPlayer().getName() == null)
+		{
+			return;
+		}
+
+		if (!client.getLocalPlayer().getName().equals(event.getActor().getName())) {
+			return;
+		}
+
+		int animId = event.getActor().getAnimation();
+		if(animId == 791) {
+			client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Current region ID: " + client.getLocalPlayer().getWorldLocation().getRegionID(), null);
+			if (client.getLocalPlayer().getWorldLocation().getRegionID() == 12119) {
+				riftGuardianTracker.addEntry(runecraftingLevel, "OURANIA", riftGuardianTracker.getDaeyalt() + riftGuardianTracker.getRegular());
+				riftGuardianTracker.setDaeyalt(0);
+				riftGuardianTracker.setRegular(0);
+			} else {
+				riftGuardianTracker.addEntry(runecraftingLevel, "OTHER", riftGuardianTracker.getDaeyalt() + riftGuardianTracker.getRegular());
+				riftGuardianTracker.setDaeyalt(0);
+				riftGuardianTracker.setRegular(0);
+			}
+		}
+	}
 
     @Subscribe
 	public void onRuneScapeProfileChanged(RuneScapeProfileChanged e){

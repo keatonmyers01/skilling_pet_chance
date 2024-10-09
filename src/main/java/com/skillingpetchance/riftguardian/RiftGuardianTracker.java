@@ -26,7 +26,7 @@ public class RiftGuardianTracker {
     PoissonCalculator poissonCalculator = new PoissonCalculator();
 
     private int Daeyalt_Count = 0;
-    private int Essence_Count;
+    private int Essence_Count = 0;
 
     @Inject
     private Gson gson;
