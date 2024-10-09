@@ -25,6 +25,10 @@ public class RiftGuardianTracker {
 
     PoissonCalculator poissonCalculator = new PoissonCalculator();
 
+    private int Daeyalt_Count = 0;
+    private int Essence_Count = 0;
+    private int Dark_Count = 0;
+
     @Inject
     private Gson gson;
 
@@ -86,5 +90,29 @@ public class RiftGuardianTracker {
         {
             configManager.setRSProfileConfiguration(SkillingPetChanceConfig.CONFIG_GROUP, KEY, json);
         }
+    }
+
+    public int getDaeyalt() {
+        return this.Daeyalt_Count;
+    }
+
+    public void setDaeyalt(int amount) {
+        this.Daeyalt_Count = amount;
+    }
+
+    public int getRegular() {
+        return this.Essence_Count;
+    }
+
+    public void setRegular(int amount) {
+        this.Essence_Count = amount;
+    }
+
+    public int getDark() {
+        return this.Dark_Count;
+    }
+
+    public void setDark(int amount) {
+        this.Dark_Count = amount;
     }
 }
