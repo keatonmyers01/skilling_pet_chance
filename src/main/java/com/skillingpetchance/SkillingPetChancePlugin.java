@@ -87,7 +87,7 @@ public class SkillingPetChancePlugin extends Plugin
 	static final int GRAND_GOLD_CHEST_CLOSED_ID = ObjectID.GRAND_GOLD_CHEST;
 	private List<GameObject> grandChests = new ArrayList<>();
 	private boolean pyramidLock = false;
-
+	private int runecraftSkillexp;
 	private boolean blastMineLock = false;
 
 	@Inject
@@ -430,10 +430,10 @@ public class SkillingPetChancePlugin extends Plugin
 				riftGuardianTracker.setDaeyalt(0);
 				riftGuardianTracker.setRegular(0);
 			} else if(client.getLocalPlayer().getWorldLocation().getRegionID() == 6715) {
-				riftGuardianTracker.addEntry(runecraftingLevel, "ARCEUUS BLOOD", riftGuardianTracker.getDark() + 1);
+				riftGuardianTracker.addEntry(runecraftingLevel, "ARCEUUS BLOOD", riftGuardianTracker.getDark());
 				riftGuardianTracker.setDark(0);
 			} else if(client.getLocalPlayer().getWorldLocation().getRegionID() == 7228) {
-				riftGuardianTracker.addEntry(runecraftingLevel, "ARCEUUS SOUL", riftGuardianTracker.getDark() + 1);
+				riftGuardianTracker.addEntry(runecraftingLevel, "ARCEUUS SOUL", riftGuardianTracker.getDark());
 				riftGuardianTracker.setDark(0);
 			}
 			else {
@@ -444,6 +444,22 @@ public class SkillingPetChancePlugin extends Plugin
 		}
 		if(animId == 7202) {
 			riftGuardianTracker.setDark(riftGuardianTracker.getDark() + 1);
+		}
+	}
+
+	@Subscribe
+	public void onStatChanged(StatChanged statChanged) {
+		final Skill skill = statChanged.getSkill();
+		final int xp = statChanged.getXp();
+		int quantity = 0;
+		if(skill.equals(Skill.RUNECRAFT)) {
+			if (client.getLocalPlayer().getWorldLocation().getRegionID() == 6715) {
+				riftGuardianTracker.addEntry(runecraftingLevel, "ARCEUUS BLOOD", (int) ((xp - runecraftSkillexp) / 23.8));
+			}
+			if (client.getLocalPlayer().getWorldLocation().getRegionID() == 12119) {
+				riftGuardianTracker.addEntry(runecraftingLevel, "ARCEUUS SOUL", (int) ((xp - runecraftSkillexp) / 29.7));
+			}
+			this.runecraftSkillexp = xp;
 		}
 	}
 
@@ -459,6 +475,7 @@ public class SkillingPetChancePlugin extends Plugin
 		riftGuardianTracker.loadFromConfig();
 		updateLevels();
 		checkMaxXp();
+		this.runecraftSkillexp = client.getSkillExperience(RUNECRAFT);
 	}
 
 	@Provides
