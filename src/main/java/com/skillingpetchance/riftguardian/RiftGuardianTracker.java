@@ -27,7 +27,6 @@ public class RiftGuardianTracker {
 
     private int Daeyalt_Count = 0;
     private int Essence_Count = 0;
-    private int Dark_Count = 0;
 
     @Inject
     private Gson gson;
@@ -106,13 +105,5 @@ public class RiftGuardianTracker {
 
     public void setRegular(int amount) {
         this.Essence_Count = amount;
-    }
-
-    public int getDark() {
-        return this.Dark_Count;
-    }
-
-    public void setDark(int amount) {
-        this.Dark_Count = amount;
     }
 }
