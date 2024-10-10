@@ -314,6 +314,19 @@ public class SkillingPetChancePlugin extends Plugin
 		if(AERIAL_PATTERN.matcher(msg).matches()){
 			heronTracker.addEntry(fishingLevel, "aerial");
 		}
+
+		//Farming
+		if(msg.equals("your vine is in perfect health.")){
+			tanglerootTracker.addEntry(farmingLevel, "grapes");
+		}
+
+		if(msg.equals("The herb patch is now empty.")){
+			tanglerootTracker.addEntry(farmingLevel, "herb");
+		}
+
+		if(msg.equals("You pick some Deadly Nightshade.")){
+			tanglerootTracker.addEntry(farmingLevel, "Nightshade");
+		}
 	}
 
     @Subscribe
@@ -358,10 +371,8 @@ public class SkillingPetChancePlugin extends Plugin
 			}
 		}
 
+
 		int[] chunksToCheck = getChucksToCheck(location);
-
-		//System.out.println(client.getLocalPlayer().getAnimation() + "  " + client.getLocalPlayer().getPoseAnimation());
-
 		for (int chunk : chunksToCheck){
 			if(atFarmingPatch(chunk)){
 				List<Patch> localPatches = patches.get(chunk);
@@ -370,9 +381,7 @@ public class SkillingPetChancePlugin extends Plugin
 				}
 				int morphId = 0;
 				for(Patch patch : localPatches) {
-					//System.out.println("patch: " + patch.getPatch().getId() +" state: " + patch.getState());
 					if(patch.isJustSpawned()){
-						System.out.println("patch " + patch.getPatch().getId() + " just spawned");
 						patch.setJustSpawned(false);
 						continue;
 					}
@@ -385,9 +394,6 @@ public class SkillingPetChancePlugin extends Plugin
 								tanglerootTracker.addEntry(farmingLevel, plantType);
 							}
 						}
-						System.out.println("patch " + patch.getPatch().getId() + " current state: " + patch.getState()
-						+ " new state: " + morphId
-						);
 						patch.setState(morphId);
 					}
 				}
