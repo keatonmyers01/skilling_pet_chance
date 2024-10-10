@@ -43,14 +43,14 @@ public class SkillingPetChancePlugin extends Plugin
 	private static  final Skill RUNECRAFT = Skill.RUNECRAFT;
 	private static  final Skill THIEVING = Skill.THIEVING;
 	private static  final Skill AGILITY = Skill.AGILITY;
-	private int woodcuttingLevel;
-	private int farmingLevel;
-	private int agilityLevel;
-	private int hunterLevel;
-	private int fishingLevel;
-	private int miningLevel;
-	private int runecraftingLevel;
-	private int thievingLevel;
+	private int woodcuttingLevel = 0;
+	private int farmingLevel = 0;
+	private int agilityLevel = 0;
+	private int hunterLevel = 0;
+	private int fishingLevel = 0;
+	private int miningLevel = 0;
+	private int runecraftingLevel = 0;
+	private int thievingLevel = 0;
 
 	private String previousCut;
 	private boolean ignore = false;
@@ -85,7 +85,7 @@ public class SkillingPetChancePlugin extends Plugin
 
 	static final int GRAND_GOLD_CHEST_ID = NullObjectID.NULL_26616;
 	static final int GRAND_GOLD_CHEST_CLOSED_ID = ObjectID.GRAND_GOLD_CHEST;
-	private List<GameObject> grandChests = new ArrayList<>();
+	private final List<GameObject> grandChests = new ArrayList<>();
 	private boolean pyramidLock = false;
 	private int runecraftSkillexp;
 	private boolean blastMineLock = false;
@@ -142,25 +142,32 @@ public class SkillingPetChancePlugin extends Plugin
 	}
 
 	private void updateLevels(){
-		woodcuttingLevel = client.getRealSkillLevel(WOODCUTTING);
-		farmingLevel = client.getRealSkillLevel(FARMING);
-		agilityLevel = client.getRealSkillLevel(AGILITY);
-		hunterLevel = client.getRealSkillLevel(HUNTER);
-		fishingLevel = client.getRealSkillLevel(FISHING);
-		miningLevel = client.getRealSkillLevel(MINING);
-		runecraftingLevel = client.getRealSkillLevel(RUNECRAFT);
-		thievingLevel = client.getRealSkillLevel(THIEVING);
+		if(woodcuttingLevel < 99){
+			woodcuttingLevel = client.getRealSkillLevel(WOODCUTTING);
+		}
+		if(farmingLevel < 99) {
+			farmingLevel = client.getRealSkillLevel(FARMING);
+		}
+		if(farmingLevel < 99) {
+			agilityLevel = client.getRealSkillLevel(AGILITY);
+		}
+		if(farmingLevel < 99) {
+			hunterLevel = client.getRealSkillLevel(HUNTER);
+		}
+		if(farmingLevel < 99) {
+			fishingLevel = client.getRealSkillLevel(FISHING);
+		}
+		if(farmingLevel < 99) {
+			miningLevel = client.getRealSkillLevel(MINING);
+		}
+		if(farmingLevel < 99) {
+			runecraftingLevel = client.getRealSkillLevel(RUNECRAFT);
+		}
+		if(farmingLevel < 99) {
+			thievingLevel = client.getRealSkillLevel(THIEVING);
+		}
 	}
-	private void checkMaxXp(){
-		if(client.getSkillExperience(WOODCUTTING) == 200000000) woodcuttingLevel = 200;
-		if(client.getSkillExperience(FARMING) == 200000000) farmingLevel = 200;
-		if(client.getSkillExperience(AGILITY) == 200000000) agilityLevel = 200;
-		if(client.getSkillExperience(HUNTER) == 200000000) hunterLevel = 200;
-		if(client.getSkillExperience(FISHING) == 200000000) fishingLevel = 200;
-		if(client.getSkillExperience(MINING) == 200000000) miningLevel = 200;
-		if(client.getSkillExperience(RUNECRAFT) == 200000000) runecraftingLevel = 200;
-		if(client.getSkillExperience(THIEVING) == 200000000) thievingLevel = 200;
-	}
+
 
 	@Subscribe
 	public void onChatMessage(ChatMessage event) {
@@ -175,8 +182,6 @@ public class SkillingPetChancePlugin extends Plugin
 			return;
 		}
 
-		updateLevels();
-		checkMaxXp();
 		String[] splitStr = null;
 		final var msg = event.getMessage();
 
@@ -231,7 +236,6 @@ public class SkillingPetChancePlugin extends Plugin
 		}
 
 		//Thieving
-
 		if(MAN_PICKPOCKET_PATTERN.matcher(msg).matches()){
 			rockyTracker.addEntry(thievingLevel, "common pickpocket");
 		}
@@ -324,8 +328,6 @@ public class SkillingPetChancePlugin extends Plugin
                 ObjectComposition imposter = client.getObjectDefinition(chest.getId()).getImpostor();
                 if (GRAND_GOLD_CHEST_CLOSED_ID != imposter.getId()) {
                     if (!pyramidLock) {
-                        updateLevels();
-                        checkMaxXp();
                         rockyTracker.addEntry(thievingLevel, "CHEST ROOM " + client.getVarbitValue(Varbits.PYRAMID_PLUNDER_ROOM));
                         pyramidLock = true;
                     }
@@ -339,8 +341,6 @@ public class SkillingPetChancePlugin extends Plugin
 				if(blastMineLock){
 					blastMineLock = false;
 				} else{
-					updateLevels();
-					checkMaxXp();
 					rockGolemTracker.addEntry(miningLevel, "BLAST MINE");
 					blastMineLock=true;
 				}
@@ -368,8 +368,6 @@ public class SkillingPetChancePlugin extends Plugin
 				Item[] items = event.getItemContainer().getItems();
 				for (Item i : items) {
 					if (i.getId() == ItemID.STARDUST) {
-						updateLevels();
-						checkMaxXp();
 						rockGolemTracker.addEntry(miningLevel, "STARDUST");
 					}
 				}
@@ -426,12 +424,13 @@ public class SkillingPetChancePlugin extends Plugin
 		int animId = event.getActor().getAnimation();
 		//runecrafting regular
 		if(animId == 791) {
-			if (client.getLocalPlayer().getWorldLocation().getRegionID() == 12119) {
+			int playerLocation = client.getLocalPlayer().getWorldLocation().getRegionID();
+			if (playerLocation== 12119) {
 				riftGuardianTracker.addEntry(runecraftingLevel, "OURANIA", riftGuardianTracker.getDaeyalt() + riftGuardianTracker.getRegular());
 				riftGuardianTracker.setDaeyalt(0);
 				riftGuardianTracker.setRegular(0);
 			}
-			else {
+			else if (playerLocation != 7228 && playerLocation != 6715){
 				riftGuardianTracker.addEntry(runecraftingLevel, "OTHER", riftGuardianTracker.getDaeyalt() + riftGuardianTracker.getRegular());
 				riftGuardianTracker.setDaeyalt(0);
 				riftGuardianTracker.setRegular(0);
@@ -441,19 +440,35 @@ public class SkillingPetChancePlugin extends Plugin
 
 	@Subscribe
 	public void onStatChanged(StatChanged statChanged) {
+		updateLevels();
 		final Skill skill = statChanged.getSkill();
 		final int xp = statChanged.getXp();
-		int quantity = 0;
-		if(skill.equals(Skill.RUNECRAFT)) {
-			if (xp - runecraftSkillexp < 2000) {
+		if(skill.equals(RUNECRAFT)) {
+			if(xp >= 200000000) runecraftingLevel = 200;
+			if (xp - runecraftSkillexp < 3500) {
 				if (client.getLocalPlayer().getWorldLocation().getRegionID() == 6715) {
-					riftGuardianTracker.addEntry(runecraftingLevel, "ARCEUUS BLOOD", (int) ((xp - runecraftSkillexp) / 23.8));
+					riftGuardianTracker.addEntry(runecraftingLevel, "ARCEUUS BLOOD", (int) Math.round((xp - runecraftSkillexp) / 23.8));
 				}
-				if (client.getLocalPlayer().getWorldLocation().getRegionID() == 12119) {
-					riftGuardianTracker.addEntry(runecraftingLevel, "ARCEUUS SOUL", (int) ((xp - runecraftSkillexp) / 29.7));
+				if (client.getLocalPlayer().getWorldLocation().getRegionID() == 7228) {
+					riftGuardianTracker.addEntry(runecraftingLevel, "ARCEUUS SOUL", (int) Math.round((xp - runecraftSkillexp) / 29.7));
 				}
-				this.runecraftSkillexp = xp;
 			}
+			runecraftSkillexp = xp;
+		}
+		else if(skill.equals(HUNTER)) {
+			if(xp >= 200000000) hunterLevel = 200;
+		}else if(skill.equals(WOODCUTTING)) {
+			if(xp >= 200000000) woodcuttingLevel = 200;
+		}else if(skill.equals(AGILITY)) {
+			if(xp >= 200000000) agilityLevel = 200;
+		}else if(skill.equals(THIEVING)) {
+			if(xp >= 200000000) thievingLevel = 200;
+		}else if(skill.equals(FARMING)) {
+			if(xp >= 200000000) farmingLevel = 200;
+		}else if(skill.equals(MINING)) {
+			if(xp >= 200000000) miningLevel = 200;
+		}else if(skill.equals(FISHING)) {
+			if(xp >= 200000000) fishingLevel = 200;
 		}
 	}
 
@@ -468,8 +483,6 @@ public class SkillingPetChancePlugin extends Plugin
 		giantSquirrelTracker.loadFromConfig();
 		riftGuardianTracker.loadFromConfig();
 		updateLevels();
-		checkMaxXp();
-		this.runecraftSkillexp = client.getSkillExperience(RUNECRAFT);
 	}
 
 	@Provides
