@@ -85,10 +85,16 @@ public class SkillingPetChancePlugin extends Plugin
 
 	static final int GRAND_GOLD_CHEST_ID = NullObjectID.NULL_26616;
 	static final int GRAND_GOLD_CHEST_CLOSED_ID = ObjectID.GRAND_GOLD_CHEST;
+	private static final int LARGE_POUCH_BROKEN = ItemID.LARGE_POUCH_5513;
+	private static final int MEDIUM_POUCH_BROKEN = ItemID.MEDIUM_POUCH_5511;
+	private static final int GIANT_POUCH_BROKEN = ItemID.GIANT_POUCH_5515;
+	private static final int COLLOSAL_POUCH_BROKEN = ItemID.COLOSSAL_POUCH_26786;
 	private final List<GameObject> grandChests = new ArrayList<>();
 	private boolean pyramidLock = false;
 	private int runecraftSkillexp;
 	private boolean blastMineLock = false;
+	private boolean recentlyRunecrafted = false;
+	private int ticksSinceLastRunecraft = 0;
 
 	@Inject
 	private WorldService worldService;
@@ -318,6 +324,9 @@ public class SkillingPetChancePlugin extends Plugin
 		{
 			grandChests.clear();
 		}
+		if(event.getGameState() == GameState.LOGGED_IN) {
+			recentlyRunecrafted = false;
+		}
 	}
 
 	@Subscribe
@@ -345,6 +354,13 @@ public class SkillingPetChancePlugin extends Plugin
 					blastMineLock=true;
 				}
 
+			}
+		}
+		if(recentlyRunecrafted) { //logic to check if there was a recent runecraft (~12s) to give time to slow crafters, more than that should not be needed
+			ticksSinceLastRunecraft++;
+			if(ticksSinceLastRunecraft >= 20) {
+				recentlyRunecrafted = false;
+				ticksSinceLastRunecraft = 0;
 			}
 		}
 	}
@@ -378,12 +394,39 @@ public class SkillingPetChancePlugin extends Plugin
 				riftGuardianTracker.setDaeyalt(0);
 				riftGuardianTracker.setRegular(0);
 				for (Item i : items) {
-					if (i.getId() == ItemID.DAEYALT_ESSENCE) {
-						riftGuardianTracker.setDaeyalt(riftGuardianTracker.getDaeyalt() + 1);
-					}
-					if (i.getId() == ItemID.RUNE_ESSENCE || i.getId() == ItemID.PURE_ESSENCE) {
-						riftGuardianTracker.setRegular(riftGuardianTracker.getRegular() + 1);
-					}
+						if (i.getId() == ItemID.DAEYALT_ESSENCE) {
+							riftGuardianTracker.setDaeyalt(riftGuardianTracker.getDaeyalt() + 1);
+						}
+						if (i.getId() == ItemID.RUNE_ESSENCE || i.getId() == ItemID.PURE_ESSENCE) {
+							riftGuardianTracker.setRegular(riftGuardianTracker.getRegular() + 1);
+						}
+						if (i.getId() == ItemID.LARGE_POUCH) {
+							riftGuardianTracker.setRegular(riftGuardianTracker.getRegular() + 9);
+						}
+						if (i.getId() == LARGE_POUCH_BROKEN) {
+							riftGuardianTracker.setRegular(riftGuardianTracker.getRegular() + 7);
+						}
+						if (i.getId() == ItemID.SMALL_POUCH) {
+							riftGuardianTracker.setRegular(riftGuardianTracker.getRegular() + 3);
+						}
+						if (i.getId() == ItemID.MEDIUM_POUCH) {
+							riftGuardianTracker.setRegular(riftGuardianTracker.getRegular() + 6);
+						}
+						if (i.getId() == MEDIUM_POUCH_BROKEN) {
+							riftGuardianTracker.setRegular(riftGuardianTracker.getRegular() + 3);
+						}
+						if (i.getId() == ItemID.GIANT_POUCH) {
+							riftGuardianTracker.setRegular(riftGuardianTracker.getRegular() + 12);
+						}
+						if (i.getId() == GIANT_POUCH_BROKEN) {
+							riftGuardianTracker.setRegular(riftGuardianTracker.getRegular() + 9);
+						}
+						if (i.getId() == ItemID.COLOSSAL_POUCH) {
+							riftGuardianTracker.setRegular(riftGuardianTracker.getRegular() + 40);
+						}
+						if (i.getId() == COLLOSAL_POUCH_BROKEN) {
+							riftGuardianTracker.setRegular(riftGuardianTracker.getRegular() + 35);
+						}
 				}
 		}
 
@@ -425,15 +468,19 @@ public class SkillingPetChancePlugin extends Plugin
 		//runecrafting regular
 		if(animId == 791) {
 			int playerLocation = client.getLocalPlayer().getWorldLocation().getRegionID();
-			if (playerLocation== 12119) {
-				riftGuardianTracker.addEntry(runecraftingLevel, "OURANIA", riftGuardianTracker.getDaeyalt() + riftGuardianTracker.getRegular());
-				riftGuardianTracker.setDaeyalt(0);
-				riftGuardianTracker.setRegular(0);
-			}
-			else if (playerLocation != 7228 && playerLocation != 6715){
-				riftGuardianTracker.addEntry(runecraftingLevel, "OTHER", riftGuardianTracker.getDaeyalt() + riftGuardianTracker.getRegular());
-				riftGuardianTracker.setDaeyalt(0);
-				riftGuardianTracker.setRegular(0);
+			if(!recentlyRunecrafted) {
+				if (playerLocation== 12119) {
+					riftGuardianTracker.addEntry(runecraftingLevel, "OURANIA", riftGuardianTracker.getDaeyalt() + riftGuardianTracker.getRegular());
+					riftGuardianTracker.setDaeyalt(0);
+					riftGuardianTracker.setRegular(0);
+					recentlyRunecrafted = true;
+				}
+				else if (playerLocation != 7228 && playerLocation != 6715){
+					riftGuardianTracker.addEntry(runecraftingLevel, "OTHER", riftGuardianTracker.getDaeyalt() + riftGuardianTracker.getRegular());
+					riftGuardianTracker.setDaeyalt(0);
+					riftGuardianTracker.setRegular(0);
+					recentlyRunecrafted = true;
+				}
 			}
 		}
 	}
