@@ -1,7 +1,8 @@
 package com.skillingpetchance;
 
 public class Action {
-    private transient double rate;private int quantity;
+    private transient double rate;
+    private int quantity;
 
     //because of how actions are stored the name and level should be droppable because they can be gotten from the maps
     //that hold them, but I am leaving them in for now, in case they simplify a future process.
