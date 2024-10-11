@@ -11,6 +11,8 @@ import com.skillingpetchance.heron.HeronTracker;
 import com.skillingpetchance.riftguardian.RiftGuardianTracker;
 import com.skillingpetchance.rockgolem.RockGolemTracker;
 import com.skillingpetchance.rocky.RockyTracker;
+import com.skillingpetchance.tangleroot.FarmingValues;
+import com.skillingpetchance.tangleroot.Patch;
 import com.skillingpetchance.tangleroot.TanglerootTracker;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
@@ -134,7 +136,14 @@ public class SkillingPetChancePlugin extends Plugin
 
 	WorldResult worldResult;
 
+	//disallow except for farming on etceteria (10300)
 	private final List<Integer> disallowedRegions = Arrays.asList(54273, 33546, 46608, 10044, 10300, 12080, 12336, 12592, 12079, 12335);
+
+	private final List<Integer> farmingRegions = FarmingValues.getFarmingRegions();
+	private final List<Integer> farmingPatches = FarmingValues.getFarmingPatches();
+	private final Map<Integer, Integer> patchToRegion = FarmingValues.getPatchToRegion();
+	private final Map<Integer, List<Patch>> patches = new HashMap<>();
+	private final Set<GameObject> tithePlants = new HashSet<>();
 
 	@Override
 	protected void startUp() throws Exception
@@ -183,8 +192,8 @@ public class SkillingPetChancePlugin extends Plugin
 		{
 			return;
 		}
-
-		if(petNotObtainableHere()) {
+		int location = client.getLocalPlayer().getWorldLocation().getRegionID();
+		if(petNotObtainableHere(location)) {
 			return;
 		}
 
@@ -311,6 +320,19 @@ public class SkillingPetChancePlugin extends Plugin
 		if(AERIAL_PATTERN.matcher(msg).matches()){
 			heronTracker.addEntry(fishingLevel, "aerial");
 		}
+
+		//Farming
+		if(msg.equals("your vine is in perfect health.")){
+			tanglerootTracker.addEntry(farmingLevel, "grapes");
+		}
+
+		if(msg.equals("The herb patch is now empty.")){
+			tanglerootTracker.addEntry(farmingLevel, "herb");
+		}
+
+		if(msg.equals("You pick some Deadly Nightshade.")){
+			tanglerootTracker.addEntry(farmingLevel, "Nightshade");
+		}
 	}
 
     @Subscribe
@@ -332,11 +354,12 @@ public class SkillingPetChancePlugin extends Plugin
 	@Subscribe
 	public void onGameTick(GameTick tick)
 	{
-		if(isInPyramidPlunder()){
-            for (GameObject chest : grandChests) {
+		int location = client.getLocalPlayer().getWorldLocation().getRegionID();
+		if(isInPyramidPlunder(location)){
+            for(GameObject chest : grandChests) {
                 ObjectComposition imposter = client.getObjectDefinition(chest.getId()).getImpostor();
-                if (GRAND_GOLD_CHEST_CLOSED_ID != imposter.getId()) {
-                    if (!pyramidLock) {
+                if(GRAND_GOLD_CHEST_CLOSED_ID != imposter.getId()) {
+                    if(!pyramidLock) {
                         rockyTracker.addEntry(thievingLevel, "CHEST ROOM " + client.getVarbitValue(Varbits.PYRAMID_PLUNDER_ROOM));
                         pyramidLock = true;
                     }
@@ -345,7 +368,7 @@ public class SkillingPetChancePlugin extends Plugin
                 }
             }
 		}
-		if(isInBlastMine()){
+		if(isInBlastMine(location)){
 			if(client.getLocalPlayer().getAnimation() == 3687){
 				if(blastMineLock){
 					blastMineLock = false;
@@ -356,11 +379,39 @@ public class SkillingPetChancePlugin extends Plugin
 
 			}
 		}
+
+		int[] chunksToCheck = getChucksToCheck(location);
+		for (int chunk : chunksToCheck){
+			if(atFarmingPatch(chunk)){
+				List<Patch> localPatches = patches.get(chunk);
+				if (localPatches == null){
+					continue;
+				}
+				int morphId = 0;
+				for(Patch patch : localPatches) {
+					if(patch.isJustSpawned()){
+						patch.setJustSpawned(false);
+						continue;
+					}
+					morphId = client.getObjectDefinition(patch.getPatch().getId()).getImpostor().getId();
+					//state changed either grew, became diseased, was harvested, or was checked
+					if(morphId != patch.getState()){
+						if(FarmingValues.getTriggerStates().contains(morphId)){
+							String plantType = FarmingValues.getStateToPlantType().get(patch.getState());
+							if(plantType != null) {
+								tanglerootTracker.addEntry(farmingLevel, plantType);
+							}
+						}
+						patch.setState(morphId);
+					}
+				}
+        
 		if(recentlyRunecrafted) { //logic to check if there was a recent runecraft (~12s) to give time to slow crafters, more than that should not be needed
 			ticksSinceLastRunecraft++;
 			if(ticksSinceLastRunecraft >= 20) {
 				recentlyRunecrafted = false;
 				ticksSinceLastRunecraft = 0;
+
 			}
 		}
 	}
@@ -375,6 +426,44 @@ public class SkillingPetChancePlugin extends Plugin
 		if(GRAND_GOLD_CHEST_CLOSED_ID == object.getId()) {
 			grandChests.add(object);
 		}
+
+		if(farmingPatches.contains(object.getId())){
+            List<Patch> localPatches = patches.computeIfAbsent(patchToRegion.get(object.getId()), k -> new ArrayList<>());
+            boolean patchInList = false;
+			Patch localPatch = null;
+			for(Patch patch : localPatches){
+				if(patch.getPatch().getId() == object.getId()){
+					patchInList = true;
+					localPatch = patch;
+				}
+			}
+			if(!patchInList){
+				System.out.println("patch " + object.getId() + " spawned, state set to 0, would be: " + client.getObjectDefinition(object.getId()).getImpostor().getId() );
+				localPatches.add(new Patch(object, 0, true));
+			} else{
+				System.out.println("patch " + object.getId() + " spawned, current state is: " + localPatch.getState());
+				localPatch.setJustSpawned(true);
+			}
+		}
+
+		if(object.getId() == 27415 || object.getId() == 27404 || object.getId() == 27393){
+			tithePlants.add(object);
+		}
+		if(object.getId() == 27383){
+			GameObject harvestPlant = null;
+			for (GameObject plant : tithePlants)
+			{
+				if (object.getWorldLocation().equals(plant.getWorldLocation()))
+				{
+					harvestPlant = plant;
+				}
+			}
+			if (harvestPlant != null){
+				tithePlants.remove(harvestPlant);
+				tanglerootTracker.addEntry(farmingLevel, "TITHE FARM");
+			}
+		}
+
 	}
 
 	@Subscribe
@@ -429,28 +518,39 @@ public class SkillingPetChancePlugin extends Plugin
 						}
 				}
 		}
-
 	}
 
 
-	public boolean isInPyramidPlunder()
+	public boolean isInPyramidPlunder(int location)
 	{
 		return client.getLocalPlayer() != null
-				&& PYRAMID_PLUNDER_REGION == client.getLocalPlayer().getWorldLocation().getRegionID()
+				&& PYRAMID_PLUNDER_REGION == location
 				&& client.getVarbitValue(Varbits.PYRAMID_PLUNDER_TIMER) > 0;
 	}
 
-	public boolean petNotObtainableHere(){
+	public boolean petNotObtainableHere(int location){
 		for (WorldType type : worldResult.findWorld(client.getWorld()).getTypes()){
 			if(type.equals(WorldType.MEMBERS)){
-				return disallowedRegions.contains(client.getLocalPlayer().getWorldLocation().getRegionID());
+				return client.getLocalPlayer() != null && disallowedRegions.contains(location);
 			}
 		}
 		return true;
 	}
 
-	public boolean isInBlastMine(){
-		return client.getLocalPlayer() != null && 5948 == client.getLocalPlayer().getWorldLocation().getRegionID();
+	public int[] getChucksToCheck(int location){
+		return new int[]{
+				location - 255, location + 1,location + 257,
+				location - 256, location, location + 256,
+				location - 257, location - 1, location + 255,
+		};
+	}
+
+	public boolean atFarmingPatch(int location){
+		return client.getLocalPlayer() != null && farmingRegions.contains(location);
+	}
+
+	public boolean isInBlastMine(int location){
+		return client.getLocalPlayer() != null && 5948 == location;
 	}
 
 	@Subscribe
@@ -530,6 +630,7 @@ public class SkillingPetChancePlugin extends Plugin
 		giantSquirrelTracker.loadFromConfig();
 		riftGuardianTracker.loadFromConfig();
 		updateLevels();
+		patches.clear();
 	}
 
 	@Provides
