@@ -22,7 +22,7 @@ public class ConfigTangleroot extends AbstractConfig {
             Map.entry("HAMMERSTONE", 112416),
             Map.entry("HERB", 98364),
             Map.entry("ASGARNIAN", 89933),
-            Map.entry("Jute", 89933),
+            Map.entry("JUTE", 89933),
             Map.entry("YANILLIAN", 74944),
             Map.entry("KRANDORIAN", 64238),
             Map.entry("WILDBLOOD", 56208),

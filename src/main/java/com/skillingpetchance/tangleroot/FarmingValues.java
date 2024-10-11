@@ -26,19 +26,20 @@ public class FarmingValues {
                 19147, 8391, 8388, 8390, 30482, 30480, 30481, 50692, 8383,
                 8382, 33733, 27116, 8338, 7580, 7577, 7579, 34006, 7578,
                 55341, 8174, 8175, 8176, 8173, 8337, 34630,
-                7771, 33761, 30500, 30501
+                7771, 33761, 30500, 30501, 34051
         );
     }
 
     //States that happens after the plant is harvested or is checked depending on type of plant
     public static List<Integer> getTriggerStates(){
-        return Arrays.asList(7840, 8573, 8207, // empty flower, allotment, and hops
+        return Arrays.asList(
+                7840, 8573, 8207, // empty flower, allotment, and hops
                 33747, 7757, //cactus plots
                 7701, 7591, 7616, 7644, 7725, 7674, //berry plots
                 8467, 8488, 8444, 8513, 8409, //tree
-                8032, 7978, 8117, 8090, 34020, 34918, 33719, //fruit tree, crystal, and celastrus
+                7947 , 8000, 8063, 8032, 7978, 8117, 8090, 34020, 34918, 33719, //fruit tree, crystal, and celastrus
                 30483, 8311, //seaweed, mushrooms
-                33725, 8355 //hespori, spirit
+                7790, 30445, 30417, 33725, 8355, 34278 //hardwood hespori, spirit, redwood
         );
     }
 
@@ -50,19 +51,19 @@ public class FarmingValues {
                 Map.entry(7887, "LOW TIER PLANTS"), Map.entry(7923, "LOW TIER PLANTS"), Map.entry(33654, "LOW TIER PLANTS"),
                 Map.entry(8624, "SWEETCORN"), Map.entry(7855, "LIMPWURT ROOT"), Map.entry(8601, "STRAWBERRY"),
                 Map.entry(33673, "SNAPE GRASS"), Map.entry(8664, "WATERMELON"), Map.entry(33748, "POTATO CACTUS"),
-                Map.entry(8196, "Barley"), Map.entry(8181, "Hammerstone"), Map.entry(-2, "Asgarnian"),
-                Map.entry(-1, "Yanillian"), Map.entry(8243, "Jute"), Map.entry(-3, "Krandorian"),
+                Map.entry(8196, "Barley"), Map.entry(8181, "Hammerstone"), Map.entry(8159, "Asgarnian"),
+                Map.entry(8294, "Yanillian"), Map.entry(8243, "Jute"), Map.entry(8218, "Krandorian"),
                 Map.entry(8265, "Wildblood"), Map.entry(7702, "redberries"), Map.entry(7592, "cadava berries"),
                 Map.entry(7617, "dwellberries"), Map.entry(7645, "jangerberries"), Map.entry(7726, "white berries"),
                 Map.entry(7675, "Poison ivy"), Map.entry(8466, "Oak"), Map.entry(8487, "Willow"),
                 Map.entry(8443, "Maple"), Map.entry(8512, "Yew"), Map.entry(8408, "Magic"),
-                Map.entry(-4, "FRUIT TREE"), Map.entry(-5, "FRUIT TREE"), Map.entry(-6, "FRUIT TREE"),
+                Map.entry(7948, "FRUIT TREE"), Map.entry(7999, "FRUIT TREE"), Map.entry(8064, "FRUIT TREE"),
                 Map.entry(8033, "FRUIT TREE"), Map.entry(7979, "FRUIT TREE"), Map.entry(8118, "FRUIT TREE"),
                 Map.entry(8091, "FRUIT TREE"), Map.entry(34917, "FRUIT TREE"), Map.entry(34021, "FRUIT TREE"),
                 Map.entry(33704, "FRUIT TREE"), Map.entry(30493, "giant seaweed"), Map.entry(8326, "mushroom"),
-                Map.entry(7758, "cactus"), Map.entry(33730, "hespori"), Map.entry(-11, "calquat"),
-                Map.entry(-7, "teak"), Map.entry(-8, "mahogany"), Map.entry(-9, "spirit"),
-                Map.entry(-10, "redwood")
+                Map.entry(7758, "cactus"), Map.entry(33730, "hespori"), Map.entry(7791, "calquat"),
+                Map.entry(30444, "teak"), Map.entry(30416, "mahogany"), Map.entry(8356, "spirit"),
+                Map.entry(34297, "redwood")
         );
     }
 

@@ -136,8 +136,8 @@ public class SkillingPetChancePlugin extends Plugin
 	private final List<Integer> farmingRegions = FarmingValues.getFarmingRegions();
 	private final List<Integer> farmingPatches = FarmingValues.getFarmingPatches();
 	private final Map<Integer, Integer> patchToRegion = FarmingValues.getPatchToRegion();
-
 	private final Map<Integer, List<Patch>> patches = new HashMap<>();
+	private final Set<GameObject> tithePlants = new HashSet<>();
 
 	@Override
 	protected void startUp() throws Exception
@@ -430,6 +430,25 @@ public class SkillingPetChancePlugin extends Plugin
 				localPatch.setJustSpawned(true);
 			}
 		}
+
+		if(object.getId() == 27415 || object.getId() == 27404 || object.getId() == 27393){
+			tithePlants.add(object);
+		}
+		if(object.getId() == 27383){
+			GameObject harvestPlant = null;
+			for (GameObject plant : tithePlants)
+			{
+				if (object.getWorldLocation().equals(plant.getWorldLocation()))
+				{
+					harvestPlant = plant;
+				}
+			}
+			if (harvestPlant != null){
+				tithePlants.remove(harvestPlant);
+				tanglerootTracker.addEntry(farmingLevel, "TITHE FARM");
+			}
+		}
+
 	}
 
 	@Subscribe
@@ -457,7 +476,6 @@ public class SkillingPetChancePlugin extends Plugin
 					}
 				}
 		}
-
 	}
 
 
