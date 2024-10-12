@@ -381,30 +381,32 @@ public class SkillingPetChancePlugin extends Plugin
 		}
 
 		int[] chunksToCheck = getChucksToCheck(location);
-		for (int chunk : chunksToCheck){
-			if(atFarmingPatch(chunk)){
+		for (int chunk : chunksToCheck) {
+			if (atFarmingPatch(chunk)) {
 				List<Patch> localPatches = patches.get(chunk);
-				if (localPatches == null){
+				if (localPatches == null) {
 					continue;
 				}
 				int morphId = 0;
-				for(Patch patch : localPatches) {
-					if(patch.isJustSpawned()){
+				for (Patch patch : localPatches) {
+					if (patch.isJustSpawned()) {
 						patch.setJustSpawned(false);
 						continue;
 					}
 					morphId = client.getObjectDefinition(patch.getPatch().getId()).getImpostor().getId();
 					//state changed either grew, became diseased, was harvested, or was checked
-					if(morphId != patch.getState()){
-						if(FarmingValues.getTriggerStates().contains(morphId)){
+					if (morphId != patch.getState()) {
+						if (FarmingValues.getTriggerStates().contains(morphId)) {
 							String plantType = FarmingValues.getStateToPlantType().get(patch.getState());
-							if(plantType != null) {
+							if (plantType != null) {
 								tanglerootTracker.addEntry(farmingLevel, plantType);
 							}
 						}
 						patch.setState(morphId);
 					}
 				}
+			}
+		}
         
 		if(recentlyRunecrafted) { //logic to check if there was a recent runecraft (~12s) to give time to slow crafters, more than that should not be needed
 			ticksSinceLastRunecraft++;
