@@ -8,10 +8,11 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ItemEvent;
+import java.util.Map;
 
 public class SkillingPetPanel extends PluginPanel {
 
-    public SkillingPetPanel (Client client, SkillingPetChanceConfig config, ConfigManager configManager){
+    public SkillingPetPanel (Client client, SkillingPetChanceConfig config, ConfigManager configManager, Map<String, TrackerInterface<?>> trackerMap){
         super();
 
         setBorder(new EmptyBorder(10, 10, 10, 10));

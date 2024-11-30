@@ -7,6 +7,8 @@ import com.google.inject.Singleton;
 import com.skillingpetchance.Action;
 import com.skillingpetchance.PoissonCalculator;
 import com.skillingpetchance.SkillingPetChanceConfig;
+import com.skillingpetchance.TrackerInterface;
+import com.skillingpetchance.chinchompa.ConfigChinchompa;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
 import net.runelite.client.config.ConfigManager;
@@ -15,13 +17,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Singleton
-public class TanglerootTracker {
+public class TanglerootTracker implements TrackerInterface<ConfigTangleroot> {
     private final String KEY = "tangleroot";
 
     private final ConfigManager configManager;
     private final Client client;
 
     private ConfigTangleroot configTangleroot;
+
+    double rate = 0;
 
     PoissonCalculator poissonCalculator = new PoissonCalculator();
 
@@ -32,6 +36,10 @@ public class TanglerootTracker {
     private TanglerootTracker(ConfigManager configManager, Client client) {
         this.configManager = configManager;
         this.client = client;
+    }
+
+    public double getRate(){
+        return rate;
     }
 
     private Action getAction(int skillLevel, String actionPerformed) {
@@ -52,6 +60,7 @@ public class TanglerootTracker {
         return action;
     }
 
+    @Override
     public void addEntry(int skillLevel, String actionPerformed){
         Action action = getAction(skillLevel, actionPerformed);
         if(action == null) {
@@ -61,7 +70,7 @@ public class TanglerootTracker {
         action.incrementQuantity(1 );
         saveToConfig(configTangleroot);
         client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", action.toString(), null);
-        double rate = poissonCalculator.calculateSuccess(configTangleroot.getActions());
+        rate = poissonCalculator.calculateSuccess(configTangleroot.getActions());
         client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "total rate: " + rate, null);
     }
 

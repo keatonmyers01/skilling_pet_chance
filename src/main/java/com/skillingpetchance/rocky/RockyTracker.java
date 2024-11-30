@@ -7,6 +7,7 @@ import com.google.inject.Singleton;
 import com.skillingpetchance.Action;
 import com.skillingpetchance.PoissonCalculator;
 import com.skillingpetchance.SkillingPetChanceConfig;
+import com.skillingpetchance.TrackerInterface;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
 import net.runelite.client.config.ConfigManager;
@@ -15,7 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Singleton
-public class RockyTracker {
+public class RockyTracker implements TrackerInterface<ConfigRocky> {
     private final String KEY = "rocky";
 
     private final ConfigManager configManager;
@@ -23,15 +24,21 @@ public class RockyTracker {
 
     private ConfigRocky configRocky;
 
+    double rate = 0;
+
     PoissonCalculator poissonCalculator = new PoissonCalculator();
 
     @Inject
     private Gson gson;
 
     @Inject
-    private RockyTracker(ConfigManager configManager, Client client) {
+    private RockyTracker(ConfigManager configManager, Client client){
         this.configManager = configManager;
         this.client = client;
+    }
+
+    public double getRate(){
+        return rate;
     }
 
     private Action getAction(int skillLevel, String actionPerformed) {
@@ -51,6 +58,7 @@ public class RockyTracker {
         return action;
     }
 
+    @Override
     public void addEntry(int skillLevel, String actionPerformed){
         actionPerformed =actionPerformed.toUpperCase();
         Action action = getAction(skillLevel, actionPerformed);
@@ -62,7 +70,7 @@ public class RockyTracker {
         action.incrementQuantity(1);
         saveToConfig(configRocky);
         client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", action.toString(), null);
-        double rate = poissonCalculator.calculateSuccess(configRocky.getActions());
+        poissonCalculator.calculateSuccess(configRocky.getActions());
         client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "total rate: " + rate, null);
 
     }

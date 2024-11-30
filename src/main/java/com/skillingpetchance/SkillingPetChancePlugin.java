@@ -142,6 +142,8 @@ public class SkillingPetChancePlugin extends Plugin
 	@Inject
 	private ClientToolbar clientToolbar;
 
+	private Map<String, TrackerInterface<?>> trackerMap;
+
 	private NavigationButton navButton;
 	private SkillingPetPanel panel;
 	private static final BufferedImage ICON = ImageUtil.loadImageResource(SkillingPetChancePlugin.class, "Rocky.png");
@@ -162,7 +164,16 @@ public class SkillingPetChancePlugin extends Plugin
 	@Override
 	protected void startUp() throws Exception
 	{
-		panel = new SkillingPetPanel(client, config, configManager);
+		trackerMap.put("Beaver", beaverTracker);
+		trackerMap.put("Chinchompa", chinchompaTracker);
+		trackerMap.put("Rock Golem", rockGolemTracker);
+		trackerMap.put("Rocky", rockyTracker);
+		trackerMap.put("Heron", heronTracker);
+		trackerMap.put("Rift Guardian", riftGuardianTracker);
+		trackerMap.put("Giant Squirrel", giantSquirrelTracker);
+		trackerMap.put("Tangleroot", tanglerootTracker);
+
+		panel = new SkillingPetPanel(client, config, configManager, trackerMap);
 		navButton = NavigationButton.builder()
 				.tooltip("My Plugin")
 				.icon(ICON)

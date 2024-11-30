@@ -7,6 +7,8 @@ import com.google.inject.Singleton;
 import com.skillingpetchance.Action;
 import com.skillingpetchance.PoissonCalculator;
 import com.skillingpetchance.SkillingPetChanceConfig;
+import com.skillingpetchance.TrackerInterface;
+import com.skillingpetchance.chinchompa.ConfigChinchompa;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
 import net.runelite.client.config.ConfigManager;
@@ -15,13 +17,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Singleton
-public class RiftGuardianTracker {
+public class RiftGuardianTracker implements TrackerInterface<ConfigRiftGuardian> {
     private final String KEY = "riftGuardian";
 
     private final ConfigManager configManager;
     private final Client client;
 
     private ConfigRiftGuardian configRiftGuardian;
+
+    double rate = 0;
 
     PoissonCalculator poissonCalculator = new PoissonCalculator();
 
@@ -35,6 +39,10 @@ public class RiftGuardianTracker {
     private RiftGuardianTracker(ConfigManager configManager, Client client) {
         this.configManager = configManager;
         this.client = client;
+    }
+
+    public double getRate(){
+        return rate;
     }
 
     private Action getAction(int skillLevel, String actionPerformed) {
@@ -54,6 +62,7 @@ public class RiftGuardianTracker {
         return action;
     }
 
+    @Override
     public void addEntry(int skillLevel, String actionPerformed, int quantity){
         actionPerformed =actionPerformed.toUpperCase();
         Action action = getAction(skillLevel, actionPerformed);
@@ -64,7 +73,7 @@ public class RiftGuardianTracker {
         action.incrementQuantity(quantity);
         saveToConfig(configRiftGuardian);
         client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", action.toString(), null);
-        double rate = poissonCalculator.calculateSuccess(configRiftGuardian.getActions());
+        rate = poissonCalculator.calculateSuccess(configRiftGuardian.getActions());
         client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "total rate: " + rate, null);
     }
 

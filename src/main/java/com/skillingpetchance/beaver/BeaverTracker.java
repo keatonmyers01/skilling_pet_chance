@@ -5,6 +5,8 @@ import com.google.inject.Singleton;
 import com.skillingpetchance.Action;
 import com.skillingpetchance.PoissonCalculator;
 import com.skillingpetchance.SkillingPetChanceConfig;
+import com.skillingpetchance.TrackerInterface;
+import com.skillingpetchance.chinchompa.ConfigChinchompa;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
 import net.runelite.client.config.ConfigManager;
@@ -16,13 +18,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Singleton
-public class BeaverTracker {
+public class BeaverTracker implements TrackerInterface<ConfigBeaver> {
     private final String KEY = "beaver";
 
     private final ConfigManager configManager;
     private final Client client;
 
     private ConfigBeaver configBeaver;
+
+    double rate = 0;
 
     PoissonCalculator poissonCalculator = new PoissonCalculator();
 
@@ -35,6 +39,10 @@ public class BeaverTracker {
     private BeaverTracker(ConfigManager configManager, Client client) {
         this.configManager = configManager;
         this.client = client;
+    }
+
+    public double getRate(){
+        return rate;
     }
 
     public void incrementUnknownCut(){
@@ -58,6 +66,7 @@ public class BeaverTracker {
         return action;
     }
 
+    @Override
     public void addEntry(int skillLevel, String actionPerformed){
         actionPerformed =actionPerformed.toUpperCase();
 
@@ -70,7 +79,7 @@ public class BeaverTracker {
         unknownCut = 0;
         saveToConfig(configBeaver);
         client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", action.toString(), null);
-        double rate = poissonCalculator.calculateSuccess(configBeaver.getActions());
+        rate = poissonCalculator.calculateSuccess(configBeaver.getActions());
         client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "total rate: " + rate, null);
 
     }

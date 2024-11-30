@@ -4,10 +4,8 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.skillingpetchance.Action;
-import com.skillingpetchance.PoissonCalculator;
-import com.skillingpetchance.SkillingPetChanceConfig;
-import com.skillingpetchance.StaticAction;
+import com.skillingpetchance.*;
+import com.skillingpetchance.chinchompa.ConfigChinchompa;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
 import net.runelite.client.config.ConfigManager;
@@ -16,13 +14,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Singleton
-public class GiantSquirrelTracker {
+public class GiantSquirrelTracker implements TrackerInterface<ConfigGiantSquirrel> {
     private final String KEY = "giantSquirrel";
 
     private final ConfigManager configManager;
     private final Client client;
 
     private ConfigGiantSquirrel configGiantSquirrel;
+
+    double rate = 0;
 
     PoissonCalculator poissonCalculator = new PoissonCalculator();
 
@@ -33,6 +33,10 @@ public class GiantSquirrelTracker {
     private GiantSquirrelTracker(ConfigManager configManager, Client client) {
         this.configManager = configManager;
         this.client = client;
+    }
+
+    public double getRate(){
+        return rate;
     }
 
     private Action getAction(int skillLevel, String actionPerformed) {
@@ -52,6 +56,7 @@ public class GiantSquirrelTracker {
         return action;
     }
 
+    @Override
     public void addEntry(int skillLevel, String actionPerformed){
         actionPerformed =actionPerformed.toUpperCase();
         Action action = getAction(skillLevel, actionPerformed);
@@ -62,7 +67,7 @@ public class GiantSquirrelTracker {
         action.incrementQuantity(1 );
         saveToConfig(configGiantSquirrel);
         client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", action.toString(), null);
-        double rate = poissonCalculator.calculateSuccess(configGiantSquirrel.getActions());
+        rate = poissonCalculator.calculateSuccess(configGiantSquirrel.getActions());
         client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "total rate: " + rate, null);
     }
 
