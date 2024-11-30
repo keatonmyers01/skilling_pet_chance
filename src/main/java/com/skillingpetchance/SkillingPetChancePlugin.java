@@ -142,7 +142,7 @@ public class SkillingPetChancePlugin extends Plugin
 	@Inject
 	private ClientToolbar clientToolbar;
 
-	private Map<String, TrackerInterface<?>> trackerMap;
+	private final Map<String, TrackerInterface<?>> trackerMap = new HashMap<>();
 
 	private NavigationButton navButton;
 	private SkillingPetPanel panel;
