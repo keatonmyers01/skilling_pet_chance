@@ -3,6 +3,7 @@ package com.skillingpetchance;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Provides;
 import javax.inject.Inject;
+import javax.swing.*;
 
 import com.skillingpetchance.beaver.BeaverTracker;
 import com.skillingpetchance.chinchompa.ChinchompaTracker;
@@ -23,9 +24,13 @@ import net.runelite.client.events.RuneScapeProfileChanged;
 import net.runelite.client.game.WorldService;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
+import net.runelite.client.util.ImageUtil;
 import net.runelite.http.api.worlds.WorldResult;
 import net.runelite.http.api.worlds.WorldType;
+import net.runelite.client.ui.ClientToolbar;
+import net.runelite.client.ui.NavigationButton;
 
+import java.awt.image.BufferedImage;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -134,6 +139,15 @@ public class SkillingPetChancePlugin extends Plugin
 	@Inject
 	private SkillingPetChanceConfig config;
 
+	@Inject
+	private ClientToolbar clientToolbar;
+
+	private NavigationButton navButton;
+	private SkillingPetPanel panel;
+	private static final BufferedImage ICON = ImageUtil.loadImageResource(SkillingPetChancePlugin.class, "Rocky.png");
+
+
+
 	WorldResult worldResult;
 
 	//disallow except for farming on etceteria (10300)
@@ -148,12 +162,24 @@ public class SkillingPetChancePlugin extends Plugin
 	@Override
 	protected void startUp() throws Exception
 	{
+		panel = new SkillingPetPanel(client, config, configManager);
+		navButton = NavigationButton.builder()
+				.tooltip("My Plugin")
+				.icon(ICON)
+				.priority(5)
+				.panel(panel)
+				.build();
+		clientToolbar.addNavigation(navButton);
+
 		worldResult = worldService.getWorlds();
 	}
 
 	@Override
 	protected void shutDown() throws Exception
 	{
+		clientToolbar.removeNavigation(navButton);
+		panel = null;
+		navButton = null;
 	}
 
 	private void updateLevels(){
